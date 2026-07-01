@@ -101,3 +101,33 @@
 @media (prefers-reduced-motion: reduce) {
   .ec-slide, .ec-overlay, .ec-track { transition: none !important; }
 }
+/* ── section header + padding (from home.css .editorial-section / .section-header) ── */
+.editorial-carousel {
+  display: block;
+  padding: 60px 0;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding-left: var(--sp-lg);
+  padding-right: var(--sp-lg);
+}
+.editorial-carousel .section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+.editorial-carousel .section-title {
+  font-family: var(--font-head);
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: 700;
+  color: var(--brown);
+}
+.editorial-carousel .see-more {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--terra);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--dur-fast) var(--ease);
+}
+.editorial-carousel .see-more:hover { color: var(--brown); }

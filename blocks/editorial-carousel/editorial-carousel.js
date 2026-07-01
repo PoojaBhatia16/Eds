@@ -46,6 +46,10 @@ function buildCarousel(container, products, label, browseUrl) {
     </article>`;
 
   container.innerHTML = `
+    <div class="section-header">
+      <h2 class="section-title">${label}</h2>
+      <a href="${browseUrl}" class="see-more">see more →</a>
+    </div>
     <div class="ec-section">
       <div class="ec-header">
         <div class="ec-left-meta">
