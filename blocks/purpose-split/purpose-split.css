@@ -1,0 +1,103 @@
+/* blocks/purpose-split/purpose-split.css (from home.css) */
+
+.purpose-split {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  gap: 0;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 64px var(--sp-lg);
+}
+
+.purpose-split .purpose-card {
+  padding: 52px 44px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.purpose-split .purpose-card--buy  { background: var(--brown); }
+.purpose-split .purpose-card--sell {
+  background: var(--white);
+  border: 1px solid rgba(65,45,21,0.1);
+  box-shadow: var(--shadow-sm);
+}
+
+.purpose-split .purpose-eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(225,220,201,0.5);
+  margin: 0;
+}
+.purpose-split .purpose-card--sell .purpose-eyebrow { color: var(--text-muted); }
+
+.purpose-split .purpose-title {
+  font-family: var(--font-head);
+  font-size: clamp(24px, 2.6vw, 34px);
+  font-weight: 700;
+  color: var(--bg);
+  line-height: 1.15;
+  margin: 0;
+}
+.purpose-split .purpose-card--sell .purpose-title { color: var(--brown); }
+.purpose-split .purpose-title em { font-style: italic; color: var(--terra-light); }
+.purpose-split .purpose-card--sell .purpose-title em { color: var(--terra); }
+
+.purpose-split .purpose-sub {
+  font-size: 13px;
+  line-height: 1.65;
+  color: rgba(225,220,201,0.6);
+  max-width: 300px;
+  margin: 0;
+  flex: 1;
+}
+.purpose-split .purpose-card--sell .purpose-sub { color: var(--text-muted); }
+
+.purpose-split .purpose-btn {
+  width: fit-content;
+  font-size: 12px;
+  padding: 12px 24px;
+}
+
+.purpose-split .purpose-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  position: relative;
+}
+.purpose-split .purpose-divider::before {
+  content: '';
+  position: absolute;
+  top: 48px; bottom: 48px; left: 50%;
+  width: 1px;
+  background: rgba(65,45,21,0.15);
+}
+.purpose-split .purpose-divider span {
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--text-muted);
+  background: var(--bg);
+  padding: 10px 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* mobile: stack, hide divider */
+@media (max-width: 768px) {
+  .purpose-split {
+    grid-template-columns: 1fr;
+    padding: 40px 16px;
+    gap: 0;
+  }
+  .purpose-split .purpose-divider { display: none; }
+  .purpose-split .purpose-card { padding: 36px 24px; border-radius: 0; }
+  .purpose-split .purpose-card--buy  { border-radius: 12px 12px 0 0; }
+  .purpose-split .purpose-card--sell { border-radius: 0 0 12px 12px; }
+}

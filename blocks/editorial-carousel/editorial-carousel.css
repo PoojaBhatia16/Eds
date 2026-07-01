@@ -1,0 +1,103 @@
+/* ============================================
+   EDITORIAL-CAROUSEL.CSS — side-by-side sliding track
+   ============================================ */
+
+.ec-section { width: 100%; }
+.ec-header { display: flex; align-items: center; position: relative; }
+
+/* Left meta */
+.ec-left-meta {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding-right: 16px; flex-shrink: 0; width: 28px; z-index: 4;
+}
+.ec-label-vert {
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  font-size: 9px; font-weight: 600; letter-spacing: 0.22em;
+  color: var(--text-muted); white-space: nowrap;
+}
+.ec-dots { display: flex; flex-direction: column; gap: 5px; }
+.ec-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(65,45,21,0.18); border: none; cursor: pointer; padding: 0;
+  transition: all 180ms ease;
+}
+.ec-dot.active { background: var(--brown); transform: scale(1.4); }
+
+/* Viewport + track */
+.ec-viewport { position: relative; flex: 1; overflow: hidden; height: 500px; }
+.ec-track {
+  position: absolute; left: 0; top: 0; height: 100%;
+  display: flex; align-items: flex-end; gap: 18px; will-change: transform;
+}
+
+/* Cards sit side by side; the active one is scaled up */
+.ec-slide {
+  flex: 0 0 auto; cursor: pointer; transform-origin: bottom center;
+  transform: scale(0.84); opacity: 0.55;
+  transition: transform 0.55s cubic-bezier(0.22,1,0.36,1), opacity 0.55s ease;
+}
+.ec-slide.is-active { transform: scale(1); opacity: 1; }
+
+.ec-img-wrap {
+  position: relative; height: 460px; border-radius: 10px;
+  overflow: hidden; background: var(--bg-dark);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.16);
+}
+.ec-img-wrap img {
+  width: 100%; height: 100%; object-fit: cover; object-position: top center;
+  display: block; transition: transform 0.5s ease;
+}
+.ec-slide.is-active:hover .ec-img-wrap img { transform: scale(1.03); }
+
+/* Overlay only on centred card */
+.ec-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 36px 22px 22px;
+  background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%);
+  border-radius: 0 0 10px 10px;
+  display: flex; flex-direction: column; gap: 4px;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.45s ease 0.12s, transform 0.45s ease 0.12s;
+}
+.ec-slide.is-active .ec-overlay { opacity: 1; transform: translateY(0); }
+.ec-overlay-eyebrow {
+  font-size: 9px; font-weight: 600; letter-spacing: 0.2em;
+  text-transform: uppercase; color: rgba(255,255,255,0.6);
+}
+.ec-overlay-title {
+  font-family: var(--font-head); font-size: 23px; font-weight: 700;
+  color: #fff; line-height: 1.08;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.ec-overlay-price { font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.88); }
+
+/* Arrows */
+.ec-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 38px; height: 38px; background: var(--white);
+  border: 1px solid rgba(65,45,21,0.12); border-radius: 50%;
+  font-size: 22px; line-height: 1; color: var(--brown); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12); transition: all 150ms ease; z-index: 5;
+}
+.ec-arrow:hover { background: var(--brown); color: var(--bg); }
+.ec-prev { left: 8px; } .ec-next { right: 8px; }
+
+/* Footer */
+.ec-footer { display: flex; justify-content: flex-end; margin-top: 14px; padding-right: 24px; }
+.ec-discover {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.16em;
+  color: var(--terra); text-decoration: none; transition: color 150ms ease;
+}
+.ec-discover:hover { color: var(--brown); }
+
+@media (max-width: 768px) {
+  .ec-left-meta { display: none; }
+  .ec-viewport { height: 380px; }
+  .ec-img-wrap { height: 350px; }
+  .ec-overlay-title { font-size: 18px; }
+  .ec-arrow { width: 32px; height: 32px; font-size: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ec-slide, .ec-overlay, .ec-track { transition: none !important; }
+}
