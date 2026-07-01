@@ -101,3 +101,14 @@
   .purpose-split .purpose-card--buy  { border-radius: 12px 12px 0 0; }
   .purpose-split .purpose-card--sell { border-radius: 0 0 12px 12px; }
 }
+
+/* match original: btn-accent = espresso, orange on hover (from home.css) */
+.purpose-split .btn-accent {
+  background: var(--brown);
+  color: var(--bg);
+  border-color: var(--brown);
+}
+.purpose-split .btn-accent:hover {
+  background: var(--terra);
+  border-color: var(--terra);
+}
