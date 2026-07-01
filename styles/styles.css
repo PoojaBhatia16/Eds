@@ -1,5 +1,6 @@
-/* ============================================
-   BASE.CSS — Reset, typography, global responsive
+/* RE:WEAR — global eager styles for EDS (design tokens + base reset/typography).
+   In the boilerplate this is styles/styles.css, loaded in the eager phase. */
+
 /* ============================================
    VARIABLES.CSS — RE:WEAR design tokens
    Palette: black + espresso + brown + linen
@@ -48,7 +49,11 @@
   --shadow-sm:  0 2px 8px rgba(0, 0, 0, 0.12);
   --shadow-md:  0 8px 24px rgba(0, 0, 0, 0.16);
   --shadow-lg:  0 20px 48px rgba(0, 0, 0, 0.22);
-}   ============================================ */
+}
+
+/* ============================================
+   BASE.CSS — Reset, typography, global responsive
+   ============================================ */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
