@@ -1,0 +1,38 @@
+.filterbar-wrapper{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.filter-btn{
+    padding:10px 18px;
+    border-radius:999px;
+    border:1px solid #ddd;
+    background:#fff;
+    cursor:pointer;
+
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+
+.filter-btn:hover{
+    background:#f7f7f7;
+}
+
+.filterbar-right{
+    margin-left:auto;
+
+    display:flex;
+    gap:12px;
+}
+
+.filter-search{
+    padding:10px 14px;
+    min-width:250px;
+}
+
+.filter-sort{
+    padding:10px;
+}
