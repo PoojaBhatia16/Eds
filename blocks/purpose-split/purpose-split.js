@@ -1,33 +1,45 @@
 /*
  * blocks/purpose-split/purpose-split.js
  *
- * Authored as a 2x2 table:
- *   | Purpose Split |                        |
- *   | For Buyers                             | For Sellers                            |
- *   | **Discover Pre-Loved Fashion**         | **Turn Your Wardrobe Into Cash**       |
- *   | Curated vintage, thrift ...            | List your pre-loved pieces ...         |
- *   | [Browse Finds →](/browse)              | [Start Selling →](/sell)               |
- *
- * (Each cell holds its lines as separate paragraphs.)
- * decorate() reshapes the two cells into the buy/sell cards with the "or" divider.
+ * Robust version: works whether the author put each line in its own paragraph
+ * OR mashed them into one paragraph with line breaks. It identifies parts by
+ * ROLE, not position:
+ *   - the link  -> CTA button
+ *   - the bold run (<strong>/<b>) -> title
+ *   - the first short line -> eyebrow
+ *   - the longest remaining line -> body text
  */
 
-function buildCard(cell, variant) {
-  const paras = [...cell.querySelectorAll('p')];
-  const link = cell.querySelector('a');
+function textLines(cell) {
+  // Split on <br> and block boundaries so soft line-breaks become separate lines.
+  const html = cell.innerHTML
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|h\d)>/gi, '\n');
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent.split('\n').map((s) => s.trim()).filter(Boolean);
+}
 
-  const eyebrow = paras[0]?.textContent.trim() || '';
-  const title = paras[1]?.textContent.trim() || '';
-  // sub = first paragraph after the title that isn't the link
-  const sub = paras.slice(2).find((p) => !p.querySelector('a'))?.textContent.trim() || '';
+function buildCard(cell, variant) {
+  const link = cell.querySelector('a');
+  const strong = cell.querySelector('strong, b');
+  const title = strong ? strong.textContent.trim() : '';
+
+  let lines = textLines(cell);
+  const ctaText = link ? link.textContent.trim() : '';
+  lines = lines.filter((l) => l && l !== ctaText);
+
+  const withoutTitle = lines.filter((l) => l !== title);
+  const eyebrow = withoutTitle[0] || '';
+  const body = withoutTitle.slice(1).sort((a, b) => b.length - a.length)[0] || '';
 
   const card = document.createElement('div');
   card.className = `purpose-card purpose-card--${variant}`;
   card.innerHTML = `
     <p class="purpose-eyebrow">${eyebrow}</p>
-    <h3 class="purpose-title">${title}</h3>
-    <p class="purpose-sub">${sub}</p>
-    ${link ? `<a href="${link.getAttribute('href')}" class="btn btn-accent purpose-btn">${link.textContent.trim()}</a>` : ''}
+    <h3 class="purpose-title">${title || eyebrow}</h3>
+    <p class="purpose-sub">${body}</p>
+    ${link ? `<a href="${link.getAttribute('href')}" class="btn btn-accent purpose-btn">${ctaText}</a>` : ''}
   `;
   return card;
 }
