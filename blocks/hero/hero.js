@@ -10,7 +10,8 @@
  */
 
 export default function decorate(block) {
-  const pics = [...block.querySelectorAll('picture, img')];
+  let pics = [...block.querySelectorAll('picture')];
+  if (!pics.length) pics = [...block.querySelectorAll('img')];
   const model = pics[0] || null;
   const thumb = pics[1] || null;
 

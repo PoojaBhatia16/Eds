@@ -1,1 +1,11 @@
-/* RE:WEAR nav styles are global (styles/lazy-styles.css). This file intentionally left minimal. */
+/* RE:WEAR nav styles are global (styles/lazy-styles.css). This file intentionally left minimal. *//* blocks/header/header.css
+   Make the <header> wrapper itself sticky. In EDS the nav lives inside <header>,
+   so sticky must be on the wrapper — sticking the inner .nav does nothing because
+   its parent <header> scrolls away. Nav visual styling stays global (lazy-styles). */
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+}
