@@ -117,12 +117,25 @@ function buildCarousel(container, products, label, browseUrl) {
     if (Math.abs(dx) > 40) move(active + (dx > 0 ? 1 : -1));
   });
 
+  // ResizeObserver fixes the "only shows after opening DevTools" bug: it fires
+  // as soon as the viewport gets a real width (after layout/CSS settle), and on
+  // every resize after — no need to wait for a window resize event.
   let rt;
-  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { sizeSlides(); center(false); }, 120); });
+  const relayout = () => { clearTimeout(rt); rt = setTimeout(() => { sizeSlides(); center(false); }, 60); };
+  if (window.ResizeObserver) {
+    new ResizeObserver(relayout).observe(viewport);
+  } else {
+    window.addEventListener('resize', relayout);
+  }
 
+  // initial sizing (in case the observer's first callback is delayed)
   sizeSlides();
-  requestAnimationFrame(() => requestAnimationFrame(() => center(false)));
-  window.addEventListener('load', () => { sizeSlides(); center(false); });
+  requestAnimationFrame(() => requestAnimationFrame(() => { sizeSlides(); center(false); }));
+  // re-center once images have loaded (they can change layout height)
+  slides.forEach((s) => {
+    const img = s.querySelector('img');
+    if (img && !img.complete) img.addEventListener('load', () => { sizeSlides(); center(false); }, { once: true });
+  });
 }
 
 export default async function decorate(block) {
