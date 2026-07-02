@@ -5,6 +5,7 @@
 .sell-container {
   padding: 40px var(--sp-lg) 80px;
   max-width: 900px;
+  margin: 0 auto;
 }
 
 /* Loading spinner */
