@@ -509,3 +509,82 @@
 .browse-search-wrap { display: flex; align-items: center; gap: 8px; background: rgba(65,45,21,0.06); border-radius: 99px; padding: 8px 14px; }
 .browse-search-wrap input { border: none; background: none; outline: none; font-size: 13px; font-family: var(--font-body); color: var(--text); width: 140px; }
 .browse-search-wrap svg { color: var(--text-muted); }
+
+/* ── Sort dropdown: override boilerplate button defaults ── */
+.product-grid .browse-sort-option {
+  display: block;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-family: var(--font-body);
+  color: var(--brown-mid);
+  text-align: left;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+  box-shadow: none;
+  outline: none;
+}
+.product-grid .browse-sort-option:hover {
+  background: var(--bg);
+  color: var(--brown);
+}
+.product-grid .browse-sort-option.is-selected {
+  color: var(--terra);
+  font-weight: 600;
+  background: none;
+}
+.product-grid .browse-sort-option.is-selected::after {
+  content: " ✓";
+}
+
+/* ── Filter dropdown buttons: override boilerplate ── */
+.product-grid .filter-dropdown-btn {
+  background: var(--white);
+  border: 1.5px solid rgba(65,45,21,0.15);
+  border-radius: 99px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.product-grid .filter-dropdown-btn:hover {
+  border-color: var(--brown);
+  background: var(--bg-dark);
+  box-shadow: none;
+}
+.product-grid .filter-dropdown-btn.active {
+  background: var(--brown);
+  border-color: var(--brown);
+  color: var(--bg);
+}
+
+/* ── Panel pills: override boilerplate ── */
+.product-grid .panel-pill {
+  border: 1px solid rgba(65,45,21,0.15);
+  border-radius: 99px;
+  background: transparent;
+  box-shadow: none;
+}
+.product-grid .panel-pill.active {
+  background: var(--brown);
+  border-color: var(--brown);
+  color: var(--bg);
+}
+
+/* ── Panel done button ── */
+.product-grid .panel-done-btn {
+  margin-top: 12px;
+  padding: 6px 16px;
+  border: 1px solid rgba(65,45,21,0.2);
+  border-radius: 99px;
+  background: none;
+  font-size: 11px;
+  font-family: var(--font-body);
+  color: var(--brown);
+  cursor: pointer;
+  display: block;
+  box-shadow: none;
+}
+.product-grid .panel-done-btn:hover {
+  background: var(--bg-dark);
+}
