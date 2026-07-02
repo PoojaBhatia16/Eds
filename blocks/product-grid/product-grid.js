@@ -1,18 +1,7 @@
 /*
- * blocks/product-grid/product-grid.js — the full BROWSE experience
- * (filter bar + grid). Ported from browse.js; filter bar and grid are one
- * coupled app, so they live in this single block.
- *
- * Authored (config read from the table cells):
- *   | Product Grid |
- *   | Data Source  | /data/products.json |
- *   | Cards Per Row| 3 |
- *   | Empty Message| No items match your filters |
- *
- * The separate "Filter Bar" table isn't needed — this block builds the filter
- * bar itself. You can delete that table from the doc.
- *
- * CSP-clean: no inline onclick/onerror/style — all via addEventListener.
+ * blocks/product-grid/product-grid.js — full browse (filter bar + grid)
+ * Class names match browse.css exactly: browse-topbar-right, browse-count,
+ * browse-clear-all, browse-active-filters, browse-main, browse-grid.
  */
 
 import { loadProducts, filterBySize, filterByPrice, searchProducts, sortProducts, getCollectionTypes, isSold } from '../../scripts/products.js';
@@ -26,12 +15,18 @@ const state = {
   styleFilter: '', brandFilter: '',
 };
 
-const FILTERBAR_HTML = `
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Free Size'];
+
+function buildFilterbarHTML() {
+  return `
   <div class="browse-filterbar">
     <div class="browse-filterbar-inner">
+      <button class="browse-clear-all" id="clearFilters">Clear all</button>
+
       <div class="filter-dropdown-wrap">
         <button class="filter-dropdown-btn" data-panel="genderPanel" id="genderBtn">Gender
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
         <div class="filter-dropdown-panel" id="genderPanel">
           <div class="panel-pills">
             <button class="panel-pill active" data-filter="gender" data-value="all">All</button>
@@ -42,27 +37,33 @@ const FILTERBAR_HTML = `
           </div>
         </div>
       </div>
+
       <div class="filter-dropdown-wrap">
         <button class="filter-dropdown-btn" data-panel="categoryPanel" id="categoryBtn">Category
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
         <div class="filter-dropdown-panel" id="categoryPanel">
           <div class="panel-checks" id="categoryFilters"></div>
           <button class="panel-done-btn" data-done="categoryPanel">Done</button>
         </div>
       </div>
+
       <div class="filter-dropdown-wrap">
         <button class="filter-dropdown-btn" data-panel="sizePanel" id="sizeBtn">Size
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
         <div class="filter-dropdown-panel" id="sizePanel">
-          <div class="panel-pills" id="sizeFilters">
-            ${['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Free Size'].map((s) => `<button class="panel-pill size-pill" data-size="${s}">${s}</button>`).join('')}
+          <div class="panel-pills">
+            ${SIZES.map((s) => `<button class="panel-pill size-pill" data-size="${s}">${s}</button>`).join('')}
           </div>
           <button class="panel-done-btn" data-done="sizePanel">Done</button>
         </div>
       </div>
+
       <div class="filter-dropdown-wrap">
         <button class="filter-dropdown-btn" data-panel="pricePanel" id="priceBtn">Price
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
         <div class="filter-dropdown-panel" id="pricePanel">
           <div class="panel-price">
             <input type="number" id="priceMin" placeholder="₹ Min">
@@ -71,9 +72,11 @@ const FILTERBAR_HTML = `
           </div>
         </div>
       </div>
+
       <div class="filter-dropdown-wrap">
         <button class="filter-dropdown-btn" data-panel="conditionPanel" id="conditionBtn">Condition
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
         <div class="filter-dropdown-panel" id="conditionPanel">
           <div class="panel-pills">
             <button class="panel-pill active" data-filter="condition" data-value="all">All</button>
@@ -84,38 +87,34 @@ const FILTERBAR_HTML = `
         </div>
       </div>
 
-      <div class="browse-search-wrap">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="search" id="browseSearchInput" placeholder="Search finds…">
-      </div>
-
-      <div class="browse-sort" id="browseSort">
-        <button class="browse-sort-trigger" id="sortTrigger" aria-expanded="false"><span id="sortLabel">Sort</span>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-        <div class="browse-sort-menu" id="sortMenu" hidden>
-          <button class="browse-sort-option is-selected" data-value="default">Featured</button>
-          <button class="browse-sort-option" data-value="price-asc">Price: Low to High</button>
-          <button class="browse-sort-option" data-value="price-desc">Price: High to Low</button>
-          <button class="browse-sort-option" data-value="saving">Biggest Saving</button>
+      <div class="browse-topbar-right">
+        <span class="browse-count" id="browseCount">—</span>
+        <div class="browse-sort" id="browseSort">
+          <button class="browse-sort-trigger" id="sortTrigger" aria-expanded="false">
+            <span id="sortLabel">Sort: Recommended</span>
+            <svg class="browse-sort-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="browse-sort-menu" id="sortMenu" hidden>
+            <button class="browse-sort-option is-selected" data-value="default">Recommended</button>
+            <button class="browse-sort-option" data-value="price-asc">Price: Low to High</button>
+            <button class="browse-sort-option" data-value="price-desc">Price: High to Low</button>
+            <button class="browse-sort-option" data-value="saving">Biggest Saving</button>
+          </div>
         </div>
       </div>
-
-      <button class="browse-clear" id="clearFilters">Clear all</button>
     </div>
-    <div class="browse-active-tags" id="activeFilters"></div>
+    <div class="browse-active-filters" id="activeFilters"></div>
   </div>
 
-  <div class="browse-results container">
-    <div class="browse-results-head"><span id="browseCount">—</span></div>
+  <div class="browse-main container">
     <div class="browse-grid" id="browseGrid"></div>
     <div class="browse-empty" id="browseEmpty" hidden>
       <p id="browseEmptyMsg">No items match your filters</p>
     </div>
-  </div>
-`;
+  </div>`;
+}
 
 export default async function decorate(block) {
-  // read config
   const cfg = {};
   block.querySelectorAll(':scope > div').forEach((row) => {
     const cells = row.querySelectorAll(':scope > div');
@@ -123,23 +122,21 @@ export default async function decorate(block) {
   });
   const emptyMsg = cfg['empty message'] || 'No items match your filters';
 
-  block.innerHTML = FILTERBAR_HTML;
+  block.innerHTML = buildFilterbarHTML();
   const $ = (sel) => block.querySelector(sel);
   const $$ = (sel) => [...block.querySelectorAll(sel)];
   $('#browseEmptyMsg').textContent = emptyMsg;
 
-  // URL params (from nav search, carousel links, footer links)
   const params = new URLSearchParams(window.location.search);
   if (params.get('gender')) state.gender = params.get('gender');
   if (params.get('search')) state.search = params.get('search');
   if (params.get('category')) state.categories = [params.get('category')];
   if (params.get('maxPrice')) state.priceMax = Number(params.get('maxPrice'));
   if (params.get('brand')) state.brandFilter = params.get('brand');
-  if (state.search) $('#browseSearchInput').value = state.search;
 
   state.all = await loadProducts();
   if (!state.all.length) {
-    $('#browseGrid').innerHTML = '<p class="browse-load-error">Could not load products. Check /data/products.json.</p>';
+    $('#browseGrid').innerHTML = '<p style="padding:40px;color:var(--text-muted)">Could not load products.</p>';
     return;
   }
 
@@ -148,7 +145,6 @@ export default async function decorate(block) {
   wireFilters();
   render();
 
-  /* ---------- render ---------- */
   function render() {
     let products = [...state.all];
     if (state.gender !== 'all') products = products.filter((p) => p.gender === state.gender || p.gender === 'unisex');
@@ -165,7 +161,7 @@ export default async function decorate(block) {
     if (bc) bc.textContent = products.length;
 
     updateFilterBtnBadges();
-    renderActiveFilterTags();
+    renderActiveTags();
     updateClearBtn();
 
     const grid = $('#browseGrid');
@@ -181,9 +177,7 @@ export default async function decorate(block) {
         <article class="product-card${sold ? ' is-sold' : ''}" data-id="${p.id}" role="link" aria-label="${p.name}">
           <div class="product-card-img">
             ${sold ? '<div class="sold-overlay"><span>Sold Out</span></div>' : ''}
-            ${p.images?.[0]
-              ? `<img src="${p.images[0]}" alt="${p.name}" loading="lazy">`
-              : '<div class="img-placeholder"></div>'}
+            ${p.images?.[0] ? `<img src="${p.images[0]}" alt="${p.name}" loading="lazy">` : '<div class="img-placeholder"></div>'}
             <button class="product-wishlist" data-id="${p.id}" aria-label="Wishlist">♡</button>
           </div>
           <div class="product-card-body">
@@ -195,26 +189,23 @@ export default async function decorate(block) {
               ${saving > 0 ? `<span class="product-saving">-${saving}%</span>` : ''}
             </div>
             <div class="product-card-foot">
-              <div class="product-sizes">${sz ? `<span class="product-size-pip">${sz}</span>` : ''}</div>
+              ${sz ? `<span class="product-size-pip">${sz}</span>` : ''}
               ${p.condition ? `<span class="product-condition-badge">${p.condition}</span>` : ''}
             </div>
           </div>
         </article>`;
     }).join('');
 
-    // hide broken images (was inline onerror — CSP)
     grid.querySelectorAll('img').forEach((img) => { img.onerror = () => { img.style.display = 'none'; }; });
     initWishlist();
   }
 
-  /* ---------- card click (was inline onclick) ---------- */
   $('#browseGrid').addEventListener('click', (e) => {
     if (e.target.closest('.product-wishlist')) return;
     const card = e.target.closest('.product-card');
     if (card) window.location.href = `/product?id=${card.dataset.id}`;
   });
 
-  /* ---------- filters wiring ---------- */
   function wireFilters() {
     $$('.filter-dropdown-btn').forEach((btn) => {
       btn.addEventListener('click', (e) => {
@@ -248,12 +239,14 @@ export default async function decorate(block) {
       render();
     }));
 
-    // sort
-    const sortWrap = $('#browseSort'); const sortTrigger = $('#sortTrigger');
-    const sortMenu = $('#sortMenu'); const sortLabel = $('#sortLabel');
+    const sortWrap = $('#browseSort');
+    const sortTrigger = $('#sortTrigger');
+    const sortMenu = $('#sortMenu');
+    const sortLabel = $('#sortLabel');
     sortTrigger.addEventListener('click', (e) => {
       e.stopPropagation();
-      const willOpen = sortMenu.hidden; sortMenu.hidden = !willOpen;
+      const willOpen = sortMenu.hidden;
+      sortMenu.hidden = !willOpen;
       sortTrigger.setAttribute('aria-expanded', String(willOpen));
     });
     $$('.browse-sort-option').forEach((opt) => opt.addEventListener('click', () => {
@@ -264,25 +257,10 @@ export default async function decorate(block) {
     }));
     document.addEventListener('click', (e) => { if (!sortWrap.contains(e.target)) sortMenu.hidden = true; });
 
-    // price debounced
     let pt;
-    const onPrice = () => {
-      clearTimeout(pt);
-      pt = setTimeout(() => {
-        state.priceMin = Number($('#priceMin').value) || 0;
-        state.priceMax = Number($('#priceMax').value) || Infinity;
-        render();
-      }, 500);
-    };
+    const onPrice = () => { clearTimeout(pt); pt = setTimeout(() => { state.priceMin = Number($('#priceMin').value) || 0; state.priceMax = Number($('#priceMax').value) || Infinity; render(); }, 500); };
     $('#priceMin').addEventListener('input', onPrice);
     $('#priceMax').addEventListener('input', onPrice);
-
-    // search
-    let st;
-    $('#browseSearchInput').addEventListener('input', (e) => {
-      clearTimeout(st);
-      st = setTimeout(() => { state.search = e.target.value; render(); }, 300);
-    });
 
     $('#clearFilters').addEventListener('click', resetFilters);
   }
@@ -299,7 +277,7 @@ export default async function decorate(block) {
     $$('.size-pill').forEach((b) => b.classList.remove('active'));
     $$('.panel-check-item input').forEach((cb) => { cb.checked = false; });
     $('#priceMin').value = ''; $('#priceMax').value = '';
-    $('#sortLabel').textContent = 'Sort';
+    $('#sortLabel').textContent = 'Sort: Recommended';
     render();
   }
 
@@ -319,7 +297,7 @@ export default async function decorate(block) {
     }));
   }
 
-  function renderActiveFilterTags() {
+  function renderActiveTags() {
     const wrap = $('#activeFilters');
     const tags = [];
     if (state.gender !== 'all') tags.push({ label: state.gender, clear: () => { state.gender = 'all'; syncGenderPills(); } });
@@ -339,36 +317,22 @@ export default async function decorate(block) {
       label: `₹${state.priceMin}${state.priceMax < Infinity ? `–₹${state.priceMax}` : '+'}`,
       clear: () => { state.priceMin = 0; state.priceMax = Infinity; $('#priceMin').value = ''; $('#priceMax').value = ''; },
     });
-
     wrap.innerHTML = tags.map((tag, i) => `<span class="active-filter-tag">${tag.label}<button data-tag="${i}">×</button></span>`).join('');
-    wrap.querySelectorAll('[data-tag]').forEach((btn) => btn.addEventListener('click', () => {
-      tags[Number(btn.dataset.tag)].clear(); render();
-    }));
+    wrap.querySelectorAll('[data-tag]').forEach((btn) => btn.addEventListener('click', () => { tags[Number(btn.dataset.tag)].clear(); render(); }));
   }
 
   function updateFilterBtnBadges() {
-    const counts = {
-      genderBtn: state.gender !== 'all' ? 1 : 0,
-      categoryBtn: state.categories.length,
-      sizeBtn: state.sizes.length,
-      priceBtn: (state.priceMin > 0 || state.priceMax < Infinity) ? 1 : 0,
-      conditionBtn: state.condition !== 'all' ? 1 : 0,
-    };
+    const counts = { genderBtn: state.gender !== 'all' ? 1 : 0, categoryBtn: state.categories.length, sizeBtn: state.sizes.length, priceBtn: (state.priceMin > 0 || state.priceMax < Infinity) ? 1 : 0, conditionBtn: state.condition !== 'all' ? 1 : 0 };
     Object.entries(counts).forEach(([id, count]) => {
       const btn = $(`#${id}`); if (!btn) return;
       btn.querySelector('.filter-count-badge')?.remove();
-      if (count > 0) {
-        const badge = document.createElement('span');
-        badge.className = 'filter-count-badge'; badge.textContent = count;
-        btn.insertBefore(badge, btn.querySelector('svg'));
-      }
+      if (count > 0) { const badge = document.createElement('span'); badge.className = 'filter-count-badge'; badge.textContent = count; btn.insertBefore(badge, btn.querySelector('svg')); }
       btn.classList.toggle('active', count > 0);
     });
   }
 
   function updateClearBtn() {
-    const has = state.gender !== 'all' || state.categories.length || state.sizes.length
-      || state.condition !== 'all' || state.priceMin > 0 || state.priceMax < Infinity;
+    const has = state.gender !== 'all' || state.categories.length || state.sizes.length || state.condition !== 'all' || state.priceMin > 0 || state.priceMax < Infinity;
     $('#clearFilters').classList.toggle('visible', has);
   }
 
@@ -383,7 +347,7 @@ export default async function decorate(block) {
       if (wishlist.includes(id)) { btn.classList.add('active'); btn.textContent = '♥'; }
       btn.addEventListener('click', (e) => {
         e.preventDefault(); e.stopPropagation();
-        if (!ensureAuth('Please log in to save favourites to your wishlist')) return;
+        if (!ensureAuth('Please log in to save to wishlist')) return;
         const on = btn.classList.toggle('active');
         btn.textContent = on ? '♥' : '♡';
         wishlist = on ? [...wishlist, id] : wishlist.filter((i) => i !== id);
