@@ -5,8 +5,9 @@
  * Author empty block on the `product` doc:  | Product Detail |
  */
 
+import { getCart, saveCart } from '../../scripts/cart.js';
 import { loadProducts, getProductById, getRelatedProducts, resizeImg, isSold } from '../../scripts/products.js';
-import { ensureAuth, getCurrentUser } from '../../scripts/auth-guard.js';
+import { ensureAuth, getCurrentUser, getWishlist, saveWishlist } from '../../scripts/auth-guard.js';
 
 const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
 
@@ -167,11 +168,11 @@ export default async function decorate(block) {
       if (!selected) { showToast('Please select a size first'); return; }
       btn.removeEventListener('click', handler);
 
-      const cart = JSON.parse(localStorage.getItem('rewear_cart') || '[]');
+      const cart = getCart();
       const existing = cart.find((i) => i.id === String(prod.id) && i.size === selected.dataset.size);
       if (existing) existing.qty = 1;
       else cart.push({ id: String(prod.id), name: prod.name, price: prod.price, size: selected.dataset.size, qty: 1, image: prod.images?.[0] || '' });
-      localStorage.setItem('rewear_cart', JSON.stringify(cart));
+      saveCart(cart);
       showToast(`${prod.name} added to bag!`);
 
       btn.innerHTML = '<span class="btn-text">Go to Bag →</span>';
@@ -193,14 +194,14 @@ export default async function decorate(block) {
   function initWishlist(prod) {
     const btn = $('wishlistBtn');
     if (!btn) return;
-    let wishlist = JSON.parse(localStorage.getItem('rewear_wishlist') || '[]');
+    let wishlist = getWishlist();
     const pid = String(prod.id);
     if (wishlist.includes(pid)) btn.classList.add('active');
     btn.addEventListener('click', () => {
       if (!ensureAuth('Please log in to save items to your wishlist')) return;
       const active = btn.classList.toggle('active');
       wishlist = active ? [...wishlist, pid] : wishlist.filter((i) => i !== pid);
-      localStorage.setItem('rewear_wishlist', JSON.stringify(wishlist));
+      saveWishlist(wishlist);
       showToast(active ? 'Added to wishlist ♥' : 'Removed from wishlist');
     });
   }

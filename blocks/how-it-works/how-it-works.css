@@ -1,0 +1,327 @@
+/* ============================================
+   HOW-IT-WORKS.CSS — Interactive, EDS-safe
+   Pure CSS animations, no GSAP
+   ============================================ */
+
+/* ── HERO ── */
+.hiw-hero {
+  padding: 56px 0 0;
+  text-align: center;
+}
+
+.hiw-eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.hiw-hero-title {
+  font-family: var(--font-head);
+  font-size: clamp(36px, 5vw, 60px);
+  font-weight: 700;
+  color: var(--brown);
+  line-height: 1.05;
+  margin-bottom: 14px;
+}
+.hiw-hero-title em { font-style: italic; color: var(--terra); }
+
+.hiw-hero-sub {
+  font-size: 15px;
+  color: var(--text-muted);
+  max-width: 440px;
+  margin: 0 auto 36px;
+  line-height: 1.7;
+}
+
+/* ── TOGGLE ── */
+.hiw-toggle {
+  display: inline-flex;
+  background: var(--bg-dark);
+  border-radius: 99px;
+  padding: 5px;
+  gap: 4px;
+  margin-bottom: 0;
+}
+
+.hiw-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 200ms ease;
+  font-family: var(--font-body);
+}
+.hiw-toggle-btn.active {
+  background: var(--brown);
+  color: var(--bg);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+.hiw-toggle-btn svg { transition: stroke 200ms ease; }
+
+/* ── FLOW SECTION ── */
+.hiw-flow { padding: 48px 0 64px; }
+
+/* ── INTERACTIVE STEPS ── */
+.hiw-steps-interactive {
+  max-width: 640px;
+  margin: 0 auto 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.hiw-step-item {
+  display: flex;
+  gap: 20px;
+  cursor: pointer;
+}
+
+.hiw-step-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 48px;
+}
+
+.hiw-step-circle {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--bg-dark);
+  border: 2px solid rgba(65,45,21,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: all 250ms ease;
+  position: relative;
+  z-index: 1;
+}
+
+.hiw-step-line {
+  width: 2px;
+  flex: 1;
+  min-height: 24px;
+  background: rgba(65,45,21,0.1);
+  margin: 4px 0;
+  transition: background 250ms ease;
+}
+
+/* Active step */
+.hiw-step-item.active .hiw-step-circle {
+  background: var(--brown);
+  border-color: var(--brown);
+  color: var(--bg);
+  box-shadow: 0 4px 16px rgba(31,21,12,0.25);
+  transform: scale(1.08);
+}
+
+.hiw-step-item.active .hiw-step-line {
+  background: rgba(65,45,21,0.25);
+}
+
+/* Right content */
+.hiw-step-right {
+  flex: 1;
+  padding-bottom: 28px;
+}
+
+.hiw-step-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0 0;
+  user-select: none;
+}
+
+.hiw-step-num {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.hiw-step-title {
+  font-family: var(--font-head);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--brown);
+  flex: 1;
+  transition: color 200ms ease;
+}
+
+.hiw-step-item.active .hiw-step-title { color: var(--terra); }
+
+.hiw-step-arrow {
+  color: var(--text-muted);
+  transition: transform 250ms ease;
+  flex-shrink: 0;
+}
+.hiw-step-item.active .hiw-step-arrow { transform: rotate(180deg); color: var(--terra); }
+
+/* Expandable body */
+.hiw-step-body {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 350ms ease, opacity 300ms ease, padding 300ms ease;
+  padding-top: 0;
+}
+
+.hiw-step-item.active .hiw-step-body {
+  max-height: 300px;
+  opacity: 1;
+  padding-top: 10px;
+}
+
+.hiw-step-body p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.hiw-step-cta {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--terra);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  transition: color 150ms ease;
+}
+.hiw-step-cta:hover { color: var(--brown); }
+
+/* Tip box */
+.hiw-tip-box {
+  background: rgba(196,94,26,0.07);
+  border-left: 3px solid var(--terra);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-top: 4px;
+}
+.hiw-tip-box strong { color: var(--terra); }
+
+/* ── PROMISE CARDS ── */
+.hiw-promises {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* section spacing so cards don't collide with the footer */
+.hiw-promise {
+  padding: 8px 0 72px;
+}
+
+.hiw-promise-card {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  padding: 22px 18px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(65,45,21,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.hiw-promise-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+.hiw-promise-icon {
+  width: 40px; height: 40px;
+  background: var(--bg-dark);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--brown);
+}
+
+.hiw-promise-card h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--brown);
+}
+
+.hiw-promise-card p {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ── CTA ── */
+.hiw-cta {
+  padding: 56px 0;
+  background: var(--brown);
+}
+
+.hiw-cta-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.hiw-cta-title {
+  font-family: var(--font-head);
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 700;
+  color: var(--bg);
+  margin-bottom: 4px;
+}
+
+.hiw-cta-sub { font-size: 13px; color: rgba(225,220,201,0.6); }
+
+.hiw-cta-btns {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.hiw-cta .btn-secondary {
+  border-color: rgba(225,220,201,0.4);
+  color: var(--bg);
+}
+.hiw-cta .btn-secondary:hover {
+  background: var(--terra);
+  border-color: var(--terra);
+  color: #fff;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .hiw-promises { grid-template-columns: 1fr 1fr; }
+  .hiw-cta-inner { flex-direction: column; text-align: center; }
+  .hiw-cta-btns { justify-content: center; }
+  .hiw-step-title { font-size: 16px; }
+}
+
+@media (max-width: 480px) {
+  .hiw-promises { grid-template-columns: 1fr; }
+  .hiw-toggle-btn { padding: 9px 16px; font-size: 12px; }
+}
+/* ── EDS additions (CSP-clean toggle; original used inline display) ── */
+.hiw-flow.is-hidden { display: none; }
+
+/* ── EDS fix: center the toggle + steps column (block .container lost centering) ── */
+.hiw-steps .container { text-align: center; }
+.hiw-toggle {
+  display: inline-flex;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hiw-steps-interactive { text-align: left; }

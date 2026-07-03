@@ -5,7 +5,7 @@
  */
 
 import { loadProducts, filterBySize, filterByPrice, searchProducts, sortProducts, getCollectionTypes, isSold } from '../../scripts/products.js';
-import { ensureAuth } from '../../scripts/auth-guard.js';
+import { ensureAuth, getWishlist, saveWishlist } from '../../scripts/auth-guard.js';
 
 const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
 
@@ -115,12 +115,17 @@ function buildFilterbarHTML() {
 }
 
 export default async function decorate(block) {
-  const cfg = {};
+  const DEFAULTS = {
+    'data source': '/data/products.json',
+    'product path': '/product',
+    'empty message': 'No items match your filters',
+  };
+  const cfg = { ...DEFAULTS };
   block.querySelectorAll(':scope > div').forEach((row) => {
     const cells = row.querySelectorAll(':scope > div');
     if (cells.length >= 2) cfg[cells[0].textContent.trim().toLowerCase()] = cells[1].textContent.trim();
   });
-  const emptyMsg = cfg['empty message'] || 'No items match your filters';
+  const emptyMsg = cfg['empty message'];
 
   block.innerHTML = buildFilterbarHTML();
   const $ = (sel) => block.querySelector(sel);
@@ -134,7 +139,7 @@ export default async function decorate(block) {
   if (params.get('maxPrice')) state.priceMax = Number(params.get('maxPrice'));
   if (params.get('brand')) state.brandFilter = params.get('brand');
 
-  state.all = await loadProducts();
+  state.all = await loadProducts(cfg['data source']);
   if (!state.all.length) {
     $('#browseGrid').innerHTML = '<p style="padding:40px;color:var(--text-muted)">Could not load products.</p>';
     return;
@@ -203,7 +208,7 @@ export default async function decorate(block) {
   $('#browseGrid').addEventListener('click', (e) => {
     if (e.target.closest('.product-wishlist')) return;
     const card = e.target.closest('.product-card');
-    if (card) window.location.href = `/product?id=${card.dataset.id}`;
+    if (card) window.location.href = `${cfg['product path']}?id=${card.dataset.id}`;
   });
 
   function wireFilters() {
@@ -341,7 +346,7 @@ export default async function decorate(block) {
   }
 
   function initWishlist() {
-    let wishlist = JSON.parse(localStorage.getItem('rewear_wishlist') || '[]');
+    let wishlist = getWishlist();
     $$('.product-wishlist').forEach((btn) => {
       const id = String(btn.dataset.id);
       if (wishlist.includes(id)) { btn.classList.add('active'); btn.textContent = '♥'; }
@@ -351,7 +356,7 @@ export default async function decorate(block) {
         const on = btn.classList.toggle('active');
         btn.textContent = on ? '♥' : '♡';
         wishlist = on ? [...wishlist, id] : wishlist.filter((i) => i !== id);
-        localStorage.setItem('rewear_wishlist', JSON.stringify(wishlist));
+        saveWishlist(wishlist);
       });
     });
   }

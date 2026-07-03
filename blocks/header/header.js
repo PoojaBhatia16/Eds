@@ -18,7 +18,7 @@ const NAV_HTML = `
       <ul class="nav-links" id="navLinks" role="list">
         <li><a href="/">Home</a></li>
         <li><a href="/browse">Browse</a></li>
-        <li><a href="/collection">Discover</a></li>
+        <li><a href="/discover">Discover</a></li>
         <li><a href="/how-it-works">How It Works</a></li>
       </ul>
       <div class="nav-actions">

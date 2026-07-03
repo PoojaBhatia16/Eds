@@ -1,13 +1,50 @@
 /*
- * blocks/wishlist/wishlist.js — wishlist page
- * Reads rewear_wishlist IDs → renders product cards with remove + add-to-bag.
- * Ported from wishlist.js. CSP-clean (event delegation), no GSAP.
- * Author empty block on `wishlist` doc:  | Wishlist |
+ * blocks/wishlist/wishlist.js — wishlist page (CONFIG-DRIVEN, HerbAtlas-style)
+ *
+ * Author on the `wishlist` doc as a 2-column table (omit any row → default):
+ *
+ *   | Wishlist |         |
+ *   | Title            | Your Wishlist |
+ *   | Browse Path      | /browse |
+ *   | Product Path     | /product |
+ *   | Cart Path        | /cart |
+ *   | Empty Text       | Your wishlist is empty. |
+ *   | Empty CTA Text   | Browse Finds → |
+ *   | Add CTA          | Add to Bag |
+ *   | Sold Label       | Sold Out |
+ *   | Own Label        | Your listing |
+ *   | Login Prompt     | Log in to add items to your bag |
  */
 
-import { getCurrentUser, ensureAuth } from '../../scripts/auth-guard.js';
+import { getCurrentUser, ensureAuth, getWishlist, saveWishlist } from '../../scripts/auth-guard.js';
 import { loadProducts, getProductById, isSold } from '../../scripts/products.js';
 import { addItem, getCartCount } from '../../scripts/cart.js';
+
+const DEFAULTS = {
+  'title': 'Your Wishlist',
+  'browse path': '/browse',
+  'product path': '/product',
+  'cart path': '/cart',
+  'empty text': 'Your wishlist is empty.',
+  'empty cta text': 'Browse Finds →',
+  'add cta': 'Add to Bag',
+  'sold label': 'Sold Out',
+  'own label': 'Your listing',
+  'login prompt': 'Log in to add items to your bag',
+};
+
+function readConfig(block) {
+  const cfg = { ...DEFAULTS };
+  block.querySelectorAll(':scope > div').forEach((row) => {
+    const cells = row.querySelectorAll(':scope > div');
+    if (cells.length >= 2) {
+      const key = cells[0].textContent.trim().toLowerCase();
+      const val = cells[1].textContent.trim();
+      if (key) cfg[key] = val;
+    }
+  });
+  return cfg;
+}
 
 const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
 
@@ -35,17 +72,18 @@ function updateCartBadge() {
 }
 
 export default async function decorate(block) {
+  const cfg = readConfig(block);
   block.innerHTML = `
     <div class="container wishlist-page">
       <div class="page-header">
-        <h1 class="page-title">Your Wishlist</h1>
+        <h1 class="page-title">${cfg['title']}</h1>
         <span class="page-count" id="wishlistCount">—</span>
       </div>
       <div class="product-grid" id="wishlistGrid"></div>
       <div class="empty-state is-hidden" id="wishlistEmpty">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        <p>Your wishlist is empty.</p>
-        <a href="/browse" class="btn btn-primary mt-8">Browse Finds →</a>
+        <p>${cfg['empty text']}</p>
+        <a href="${cfg['browse path']}" class="btn btn-primary mt-8">${cfg['empty cta text']}</a>
       </div>
     </div>
   `;
@@ -56,7 +94,7 @@ export default async function decorate(block) {
 
   const showEmpty = () => { grid.innerHTML = ''; empty.classList.remove('is-hidden'); count.textContent = '0 items'; };
 
-  const ids = JSON.parse(localStorage.getItem('rewear_wishlist') || '[]');
+  const ids = getWishlist();
   if (!ids.length) return showEmpty();
 
   const all = await loadProducts();
@@ -68,12 +106,12 @@ export default async function decorate(block) {
   grid.innerHTML = products.map((p) => {
     const own = isOwnListing(p);
     const sold = isSold(p.id);
-    const label = own ? 'Your listing' : sold ? 'Sold Out' : 'Add to Bag';
+    const label = own ? cfg['own label'] : sold ? cfg['sold label'] : cfg['add cta'];
     const cls = own ? ' is-own-listing' : sold ? ' is-sold-out' : '';
     return `
       <article class="product-card${sold ? ' is-sold' : ''}" data-id="${p.id}" role="link" aria-label="${p.name}">
         <div class="product-card-img">
-          ${sold ? '<div class="sold-overlay"><span>Sold Out</span></div>' : ''}
+          ${sold ? `<div class="sold-overlay"><span>${cfg['sold label']}</span></div>` : ''}
           ${p.images?.[0] ? `<img src="${p.images[0]}" alt="${p.name}" loading="lazy" class="wl-img">` : '<div class="img-placeholder"></div>'}
           <button class="product-wishlist active" data-remove="${p.id}" aria-label="Remove from wishlist">
             <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -100,7 +138,7 @@ export default async function decorate(block) {
   grid.addEventListener('click', (e) => {
     if (e.target.closest('button')) return;
     const card = e.target.closest('.product-card');
-    if (card) window.location.href = `/product?id=${card.dataset.id}`;
+    if (card) window.location.href = `${cfg['product path']}?id=${card.dataset.id}`;
   });
 
   /* remove from wishlist (delegation) */
@@ -108,9 +146,9 @@ export default async function decorate(block) {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const id = btn.dataset.remove;
-      let wl = JSON.parse(localStorage.getItem('rewear_wishlist') || '[]');
+      let wl = getWishlist();
       wl = wl.filter((i) => String(i) !== String(id));
-      localStorage.setItem('rewear_wishlist', JSON.stringify(wl));
+      saveWishlist(wl);
       const card = btn.closest('.product-card');
       card?.remove();
       const remaining = grid.querySelectorAll('.product-card').length;
@@ -124,7 +162,7 @@ export default async function decorate(block) {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (btn.disabled) return;
-      if (!ensureAuth('Log in to add items to your bag')) return;
+      if (!ensureAuth(cfg['login prompt'])) return;
       const id = btn.dataset.add;
       const p = products.find((x) => String(x.id) === String(id));
       if (!p || isSold(id)) return;
@@ -134,7 +172,7 @@ export default async function decorate(block) {
       updateCartBadge();
       btn.classList.add('added');
       btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg><span>Go to Bag</span>';
-      btn.addEventListener('click', (ev) => { ev.stopPropagation(); window.location.href = '/cart'; });
+      btn.addEventListener('click', (ev) => { ev.stopPropagation(); window.location.href = cfg['cart path']; });
     });
   });
 }

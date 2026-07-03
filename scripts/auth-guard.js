@@ -36,6 +36,32 @@ export function isLoggedIn() {
   return getCurrentUser() !== null;
 }
 
+/* ── per-user storage keys ──
+ * Cart & wishlist are namespaced per account so different users on the same
+ * browser don't see each other's items. Logged-out = a shared "guest" bucket.
+ */
+function userScope() {
+  const u = getCurrentUser();
+  return u ? (u.id || u.email || 'user') : 'guest';
+}
+export function cartKey() { return `rewear_cart_${userScope()}`; }
+export function wishlistKey() { return `rewear_wishlist_${userScope()}`; }
+
+export function getWishlist() {
+  try { return JSON.parse(localStorage.getItem(wishlistKey())) || []; } catch { return []; }
+}
+export function saveWishlist(ids) {
+  localStorage.setItem(wishlistKey(), JSON.stringify(ids));
+}
+export function toggleWishlist(id) {
+  const ids = getWishlist().map(String);
+  const key = String(id);
+  const idx = ids.indexOf(key);
+  if (idx >= 0) ids.splice(idx, 1); else ids.push(key);
+  saveWishlist(ids);
+  return idx < 0; // true = now in wishlist
+}
+
 /* ensureAuth(message) — gate an ACTION (add to cart / wishlist / buy) behind login.
    Returns true if logged in. If not: remembers this page + a reason, then sends to login.
    After a successful login, auth.js sends the user back here automatically. */

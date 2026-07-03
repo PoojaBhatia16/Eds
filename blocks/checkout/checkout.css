@@ -1,0 +1,433 @@
+/* ============================================
+   CHECKOUT.CSS
+   ============================================ */
+
+/* Progress bar */
+.checkout-progress {
+  background: var(--white);
+  border-bottom: 1px solid rgba(65,45,21,0.08);
+  padding: 16px 0;
+}
+
+.checkout-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.checkout-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.35;
+  transition: opacity 300ms ease;
+}
+
+.checkout-step.active  { opacity: 1; }
+.checkout-step.done    { opacity: 0.7; }
+
+.step-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--bg-dark);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 300ms ease;
+}
+
+.checkout-step.active .step-num {
+  background: var(--brown);
+  color: var(--bg);
+}
+
+.checkout-step.done .step-num {
+  background: #3B6D11;
+  color: white;
+}
+
+.checkout-step.done .step-num::before { content: '✓'; }
+
+.step-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.checkout-step.active .step-label { color: var(--brown); }
+
+.checkout-step-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(65,45,21,0.15);
+  margin: 0 12px;
+  margin-bottom: 16px;
+}
+
+/* Main layout */
+.checkout-main {
+  padding: 40px var(--sp-lg) 80px;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 48px;
+  align-items: start;
+}
+
+/* Left: form */
+.checkout-form-section { display: flex; flex-direction: column; gap: 0; }
+
+.checkout-section-title {
+  font-family: var(--font-head);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--brown);
+  margin-bottom: 24px;
+}
+
+.checkout-form { display: flex; flex-direction: column; gap: 16px; }
+
+.checkout-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.checkout-field { display: flex; flex-direction: column; gap: 6px; }
+
+.checkout-field label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brown-mid);
+}
+
+.checkout-field input,
+.checkout-field select,
+.checkout-field textarea {
+  padding: 11px 14px;
+  border: 1.5px solid rgba(65,45,21,0.18);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  font-size: 14px;
+  color: var(--text);
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.checkout-field input:focus,
+.checkout-field select:focus,
+.checkout-field textarea:focus {
+  border-color: var(--brown-mid);
+  box-shadow: 0 0 0 3px rgba(65,45,21,0.07);
+}
+
+.checkout-field input::placeholder { color: var(--text-muted); }
+
+/* Saved addresses */
+.saved-addresses { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+
+.saved-address-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1.5px solid rgba(65,45,21,0.15);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 150ms ease;
+  background: var(--white);
+}
+
+.saved-address-card.selected {
+  border-color: var(--brown);
+  background: rgba(65,45,21,0.03);
+}
+
+.saved-address-card input[type="radio"] { margin-top: 2px; accent-color: var(--brown); }
+
+.saved-address-info { flex: 1; }
+.saved-address-name  { font-weight: 600; font-size: 14px; color: var(--brown); margin-bottom: 2px; }
+.saved-address-text  { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+.checkout-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 8px 0 16px;
+  font-size: 11px; color: var(--text-muted); letter-spacing: 0.1em;
+}
+.checkout-divider::before,
+.checkout-divider::after {
+  content: ''; flex: 1;
+  height: 1px; background: rgba(65,45,21,0.1);
+}
+
+/* Delivery options */
+.delivery-options { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+
+.delivery-option {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+  border: 1.5px solid rgba(65,45,21,0.15);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 150ms ease;
+  background: var(--white);
+}
+
+.delivery-option.selected { border-color: var(--brown); }
+.delivery-option input[type="radio"] { accent-color: var(--brown); }
+
+.delivery-option-info { flex: 1; }
+.delivery-option-name  { font-weight: 600; font-size: 14px; color: var(--brown); }
+.delivery-option-desc  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.delivery-option-price { font-weight: 600; font-size: 14px; color: var(--brown); }
+
+/* Continue button */
+.checkout-continue {
+  width: 100%;
+  height: 52px;
+  margin-top: 24px;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  border-radius: var(--radius-sm);
+}
+
+/* ── RIGHT: Order summary ── */
+.checkout-summary {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: calc(var(--nav-h) + 20px);
+}
+
+.checkout-summary-title {
+  font-family: var(--font-head);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--brown);
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(65,45,21,0.08);
+}
+
+.checkout-items { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+
+.checkout-item {
+  display: flex; gap: 12px; align-items: center;
+}
+
+.checkout-item-img {
+  width: 56px; height: 72px;
+  border-radius: var(--radius-sm);
+  overflow: hidden; background: var(--bg-dark); flex-shrink: 0;
+}
+
+.checkout-item-img img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: top center;
+}
+
+.checkout-item-info { flex: 1; }
+.checkout-item-name  { font-size: 13px; font-weight: 500; color: var(--brown); line-height: 1.3; }
+.checkout-item-meta  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.checkout-item-price { font-size: 13px; font-weight: 600; color: var(--brown); flex-shrink: 0; }
+
+.checkout-summary-rows {
+  display: flex; flex-direction: column; gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(65,45,21,0.08);
+}
+
+.checkout-summary-row {
+  display: flex; justify-content: space-between;
+  font-size: 13px; color: var(--text-muted);
+}
+
+.checkout-summary-row.total {
+  font-size: 15px; font-weight: 600;
+  color: var(--brown);
+  padding-top: 12px;
+  border-top: 1px solid rgba(65,45,21,0.1);
+  margin-top: 4px;
+}
+
+/* Payment step */
+.payment-options { display: flex; flex-direction: column; gap: 12px; }
+
+.payment-option {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px;
+  border: 1.5px solid rgba(65,45,21,0.15);
+  border-radius: var(--radius-md);
+  cursor: pointer; transition: all 150ms ease;
+  background: var(--white);
+}
+
+.payment-option.selected { border-color: var(--brown); }
+.payment-option input[type="radio"] { accent-color: var(--brown); }
+.payment-option-icon { font-size: 22px; }
+.payment-option-label { font-weight: 600; font-size: 14px; color: var(--brown); }
+.payment-option-desc  { font-size: 11px; color: var(--text-muted); }
+
+/* Order confirmed */
+.checkout-confirmed {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.confirmed-icon {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: #EAF3DE;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+}
+
+.confirmed-title {
+  font-family: var(--font-head);
+  font-size: 32px;
+  color: var(--brown);
+}
+
+.confirmed-id {
+  font-size: 13px; color: var(--text-muted);
+  background: var(--bg-dark);
+  padding: 8px 20px; border-radius: 99px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .checkout-main { grid-template-columns: 1fr; }
+  .checkout-row  { grid-template-columns: 1fr; }
+  .checkout-summary { position: static; }
+}
+
+/* migrated from inline */
+.checkout-secure { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
+
+/* ── checkout form validation ── */
+.checkout-field.has-error input,
+.checkout-field.has-error select {
+  border-color: #C44242 !important;
+  box-shadow: 0 0 0 3px rgba(196,66,66,0.12);
+}
+.checkout-err { display: block; font-size: 12px; color: #C44242; margin-top: 6px; }
+
+/* pincode auto-lookup status */
+.pin-status { display: block; font-size: 11.5px; margin-top: 5px; min-height: 14px; font-weight: 500; }
+.pin-status.loading { color: var(--text-muted, #6B5A45); }
+.pin-status.ok { color: #157347; font-weight: 600; }
+.pin-status.error { color: #C44242; }
+
+/* ============================================
+   PAYMENT METHOD — expandable real-feel panels
+   ============================================ */
+.payment-method { border: 1.5px solid rgba(65,45,21,0.15); border-radius: var(--radius-md); background: var(--white); overflow: hidden; transition: border-color 150ms ease; }
+.payment-method:has(.payment-option.selected) { border-color: var(--brown); }
+.payment-method .payment-option { border: none; border-radius: 0; }
+.payment-method .payment-option.selected { border: none; }
+
+/* detail panel — slides open when its method is selected */
+.payment-detail {
+  max-height: 0; opacity: 0; overflow: hidden;
+  padding: 0 16px;
+  transition: max-height 280ms ease, opacity 220ms ease, padding 280ms ease;
+}
+.payment-option.selected + .payment-detail {
+  max-height: 320px; opacity: 1; padding: 4px 16px 18px;
+}
+
+.pay-detail-label { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin: 10px 0 8px; font-weight: 600; }
+
+/* UPI app chips */
+.upi-apps { display: flex; flex-wrap: wrap; gap: 8px; }
+.upi-app {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 14px; border: 1.5px solid rgba(65,45,21,0.18); border-radius: 10px;
+  background: var(--white); font-family: var(--font-body); font-size: 13px; font-weight: 500;
+  color: var(--brown); cursor: pointer; transition: all 150ms ease;
+}
+.upi-app:hover { border-color: var(--brown-mid); }
+.upi-app.selected { border-color: var(--brown); background: var(--bg); box-shadow: inset 0 0 0 1px var(--brown); }
+.upi-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* shared payment input */
+.pay-input {
+  width: 100%; padding: 12px 14px; margin-top: 8px;
+  border: 1.5px solid rgba(65,45,21,0.18); border-radius: 10px;
+  background: var(--white); font-family: var(--font-body); font-size: 14px; color: var(--text);
+  outline: none; transition: border-color 150ms ease;
+}
+.pay-input:focus { border-color: var(--terra); }
+.pay-row { display: flex; gap: 10px; }
+.pay-row .pay-input { flex: 1; }
+
+/* bank chips */
+.bank-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+.bank-chip {
+  padding: 8px 16px; border: 1.5px solid rgba(65,45,21,0.18); border-radius: 100px;
+  background: var(--white); font-family: var(--font-body); font-size: 12.5px; font-weight: 600;
+  color: var(--brown-mid); cursor: pointer; transition: all 150ms ease;
+}
+.bank-chip:hover { border-color: var(--brown-mid); }
+.bank-chip.selected { background: var(--brown); color: var(--bg); border-color: var(--brown); }
+
+.pay-cod-note { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin: 6px 0; }
+/* ============================================
+   EDS migration — classes replacing former inline styles
+   ============================================ */
+
+/* step 1: "Delivery Option" sub-heading (was inline style) */
+.checkout-field-heading {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--brown-mid); margin-bottom: 12px;
+}
+.checkout-delivery-block { margin-top: 8px; }
+
+/* step 2: secure note strip (was inline style) */
+.checkout-secure-note {
+  background: var(--bg-dark); border-radius: var(--radius-md);
+  padding: 14px 16px; margin-top: 20px; font-size: 12px;
+  color: var(--text-muted); display: flex; gap: 8px; align-items: center;
+}
+
+/* step 2: back / place-order button row (was inline style) */
+.checkout-actions { display: flex; gap: 12px; margin-top: 24px; }
+.checkout-back  { flex: 1; height: 52px; font-size: 13px; }
+.checkout-place { flex: 2; height: 52px; font-size: 13px; letter-spacing: 0.1em; }
+
+/* order summary: free delivery + image placeholder (were inline styles) */
+.free-label { color: #3B6D11; }
+.checkout-item-placeholder { height: 100%; background: var(--bg-dark); }
+
+/* step 3: confirmed screen (all were inline styles) */
+.confirmed-copy {
+  font-size: 14px; color: var(--text-muted); max-width: 400px; line-height: 1.7;
+}
+.confirmed-address-card {
+  background: var(--white); border-radius: var(--radius-md);
+  padding: 20px 24px; box-shadow: var(--shadow-sm);
+  max-width: 360px; width: 100%; margin-top: 8px;
+}
+.confirmed-address-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+.confirmed-address { font-size: 14px; font-weight: 500; color: var(--brown); line-height: 1.5; }
+.confirmed-eta { font-size: 13px; color: var(--text-muted); }
+.confirmed-actions { display: flex; gap: 12px; margin-top: 8px; }
+.confirmed-actions .btn { padding: 12px 28px; }
+
+/* UPI app dots (were inline background colors) */
+.upi-dot-gpay    { background: #4285F4; }
+.upi-dot-phonepe { background: #5F259F; }
+.upi-dot-paytm   { background: #00BAF2; }
+.upi-dot-bhim    { background: #00A859; }

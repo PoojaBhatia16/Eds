@@ -34,7 +34,16 @@ const IMG_SLOTS = [
 ];
 
 export default function decorate(block) {
-  if (!requireAuth('/login')) return;
+  // Light config: paths + top-level onboarding copy (app panel — not fully authorable)
+  const CFG = { 'login path': '/login' };
+  block.querySelectorAll(':scope > div').forEach((row) => {
+    const cells = row.querySelectorAll(':scope > div');
+    if (cells.length >= 2) {
+      const k = cells[0].textContent.trim().toLowerCase();
+      if (k) CFG[k] = cells[1].textContent.trim();
+    }
+  });
+  if (!requireAuth(CFG['login path'])) return;
   block.innerHTML = '<div class="container sell-container"><div id="sellMain"></div></div>';
   const main = block.querySelector('#sellMain');
   let slotImages = {};

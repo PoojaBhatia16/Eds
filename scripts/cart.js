@@ -2,15 +2,15 @@
    CART.JS — Cart utility functions
    ============================================ */
 
-const CART_KEY = 'rewear_cart';
+import { cartKey } from './auth-guard.js';
 
 export function getCart() {
-  try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
+  try { return JSON.parse(localStorage.getItem(cartKey())) || []; }
   catch { return []; }
 }
 
 export function saveCart(cart) {
-  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  localStorage.setItem(cartKey(), JSON.stringify(cart));
 }
 
 export function addItem(product, size, qty = 1) {

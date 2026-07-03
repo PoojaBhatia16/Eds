@@ -3,9 +3,9 @@
    ============================================ */
 
 /* ── LOAD ──────────────────────────────────── */
-export async function loadProducts() {
+export async function loadProducts(dataSource = '/data/products.json') {
   try {
-    const res = await fetch('/data/products.json');
+    const res = await fetch(dataSource);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const products = await res.json();
 

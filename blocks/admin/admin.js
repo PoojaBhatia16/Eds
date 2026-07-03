@@ -36,7 +36,16 @@ const getUsers = () => { try { return JSON.parse(localStorage.getItem(USERS_KEY)
 const setUsers = (arr) => localStorage.setItem(USERS_KEY, JSON.stringify(arr));
 
 export default function decorate(block) {
-  if (!requireRole('admin', '/')) return;
+  // Light config: data source + redirect path (app panel — not fully authorable)
+  const CFG = { 'data source': '/data/products.json', 'redirect path': '/' };
+  block.querySelectorAll(':scope > div').forEach((row) => {
+    const cells = row.querySelectorAll(':scope > div');
+    if (cells.length >= 2) {
+      const k = cells[0].textContent.trim().toLowerCase();
+      if (k) CFG[k] = cells[1].textContent.trim();
+    }
+  });
+  if (!requireRole('admin', CFG['redirect path'])) return;
 
   let baseProducts = [];
   let activeTab = 'pending';
@@ -75,7 +84,7 @@ export default function decorate(block) {
   const content = $('adminContent');
 
   /* fetch base catalogue for Live/SoldOut counts */
-  fetch('/data/products.json').then((r) => r.json()).then((arr) => {
+  fetch(CFG['data source']).then((r) => r.json()).then((arr) => {
     baseProducts = Array.isArray(arr) ? arr : (arr.products || []);
     renderTab(activeTab);
     updateBadges();
