@@ -315,9 +315,3 @@
 .profile-role-badge.role-buyer  { background: var(--bg-dark);       color: var(--brown-mid); }
 .profile-nav-item.is-hidden { display: none; }
 .profile-nav-item { background: none; border: none; font-family: inherit; cursor: pointer; text-align: left; width: 100%; }
-
-/* ── clean fix: block takes natural height, footer sits below, nothing bleeds through ── */
-.orders-page { overflow: visible; padding-bottom: 64px; }
-.profile-layout { align-items: start; }
-.profile-main { align-self: start; }
-.order-card { position: relative; z-index: 1; }

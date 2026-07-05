@@ -120,13 +120,13 @@ export default function decorate(block) {
     const addr = o.address || {};
     return `
       <article class="order-card">
-        <header class="order-card-head">
+        <div class="order-card-head">
           <div>
             <span class="order-id">Order ${esc(o.id)}</span>
             <span class="order-date">${date} · ${count} item${count !== 1 ? 's' : ''}</span>
           </div>
           <span class="order-status order-status--${(o.status || 'processing').toLowerCase()}">${o.status || 'Processing'}</span>
-        </header>
+        </div>
         <div class="order-items">
           ${o.items.map((i) => {
             const link = i.id ? ` href="${cfg['product path']}?id=${encodeURIComponent(i.id)}"` : '';
@@ -142,7 +142,7 @@ export default function decorate(block) {
             </${tag}>`;
           }).join('')}
         </div>
-        <footer class="order-card-foot">
+        <div class="order-card-foot">
           <div class="order-ship">
             <span class="order-ship-label">Delivered to</span>
             <span class="order-ship-val">${esc(addr.firstName || '')} ${esc(addr.lastName || '')}${addr.city ? ', ' + esc(addr.city) : ''}</span>
@@ -151,7 +151,7 @@ export default function decorate(block) {
             <span class="order-total-label">Total</span>
             <span class="order-total-val">${fmt(o.total)}</span>
           </div>
-        </footer>
+        </div>
       </article>`;
   }).join('')}</div>`;
 }
