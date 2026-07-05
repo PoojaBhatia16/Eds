@@ -20,6 +20,7 @@ import { requireAuth, getCurrentUser, logout } from '../../scripts/auth-guard.js
 import { getCart } from '../../scripts/cart.js';
 
 const fmt = (n) => '₹' + Number(n || 0).toLocaleString('en-IN');
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 
 const DEFAULTS = {
   'login path': '/login',
@@ -72,8 +73,8 @@ export default function decorate(block) {
       <div class="profile-layout">
         <aside class="profile-sidebar">
           <div class="profile-avatar"><span>${initials}</span></div>
-          <h2 class="profile-name">${user.name || `${user.firstName} ${user.lastName}`}</h2>
-          <p class="profile-email">${user.email}</p>
+          <h2 class="profile-name">${esc(user.name || `${user.firstName} ${user.lastName}`)}</h2>
+          <p class="profile-email">${esc(user.email)}</p>
           <span class="profile-role-badge role-${role}">${role}</span>
           <div class="profile-stats">
             <div class="profile-stat"><span class="profile-stat-num">${wishlistCount}</span><span class="profile-stat-label">Saved</span></div>
@@ -121,20 +122,20 @@ export default function decorate(block) {
       <article class="order-card">
         <header class="order-card-head">
           <div>
-            <span class="order-id">Order ${o.id}</span>
+            <span class="order-id">Order ${esc(o.id)}</span>
             <span class="order-date">${date} · ${count} item${count !== 1 ? 's' : ''}</span>
           </div>
           <span class="order-status order-status--${(o.status || 'processing').toLowerCase()}">${o.status || 'Processing'}</span>
         </header>
         <div class="order-items">
           ${o.items.map((i) => {
-            const link = i.id ? ` href="${cfg['product path']}?id=${i.id}"` : '';
+            const link = i.id ? ` href="${cfg['product path']}?id=${encodeURIComponent(i.id)}"` : '';
             const tag = i.id ? 'a' : 'div';
             return `<${tag} class="order-item${i.id ? ' is-link' : ''}"${link}>
-              <div class="order-item-img">${i.image ? `<img src="${i.image}" alt="${i.name}">` : ''}</div>
+              <div class="order-item-img">${i.image ? `<img src="${esc(i.image)}" alt="${esc(i.name)}">` : ''}</div>
               <div class="order-item-info">
-                <p class="order-item-name">${i.name}</p>
-                <p class="order-item-meta">${i.brand ? i.brand + ' · ' : ''}Size ${i.size || '—'} · Qty ${i.qty || 1}</p>
+                <p class="order-item-name">${esc(i.name)}</p>
+                <p class="order-item-meta">${i.brand ? esc(i.brand) + ' · ' : ''}Size ${esc(i.size || '—')} · Qty ${i.qty || 1}</p>
               </div>
               <span class="order-item-price">${fmt(i.price * (i.qty || 1))}</span>
               ${i.id ? '<svg class="order-item-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>' : ''}
@@ -144,7 +145,7 @@ export default function decorate(block) {
         <footer class="order-card-foot">
           <div class="order-ship">
             <span class="order-ship-label">Delivered to</span>
-            <span class="order-ship-val">${addr.firstName || ''} ${addr.lastName || ''}${addr.city ? ', ' + addr.city : ''}</span>
+            <span class="order-ship-val">${esc(addr.firstName || '')} ${esc(addr.lastName || '')}${addr.city ? ', ' + esc(addr.city) : ''}</span>
           </div>
           <div class="order-total">
             <span class="order-total-label">Total</span>
