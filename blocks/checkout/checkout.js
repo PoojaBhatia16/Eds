@@ -92,12 +92,6 @@ function renderStep(step) {
   if (step === 1) renderDelivery();
   if (step === 2) renderPayment();
   if (step === 3) renderConfirmed();
-
-  if (window.gsap) {
-    window.gsap.from('.checkout-form-section, .checkout-confirmed', {
-      y: 20, opacity: 0, duration: 0.4, ease: 'power2.out',
-    });
-  }
 }
 
 function updateProgressBar(step) {
@@ -488,11 +482,6 @@ function renderConfirmed() {
       </div>
     </div>
   `;
-
-  if (window.gsap) {
-    window.gsap.from('.confirmed-icon', { scale: 0, duration: 0.5, ease: 'back.out(1.7)', delay: 0.2 });
-    window.gsap.from('.confirmed-title', { y: 20, opacity: 0, duration: 0.4, delay: 0.4 });
-  }
 
   const badge = document.querySelector('.cart-badge');
   if (badge) { badge.textContent = ''; badge.classList.add('is-hidden'); }

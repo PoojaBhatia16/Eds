@@ -138,6 +138,8 @@ export default async function decorate(block) {
   if (params.get('category')) state.categories = [params.get('category')];
   if (params.get('maxPrice')) state.priceMax = Number(params.get('maxPrice'));
   if (params.get('brand')) state.brandFilter = params.get('brand');
+  if (params.get('style')) state.styleFilter = params.get('style');
+  if (params.get('collection_type')) state.categories = [params.get('collection_type')];
 
   state.all = await loadProducts(cfg['data source']);
   if (!state.all.length) {
@@ -155,6 +157,13 @@ export default async function decorate(block) {
     if (state.gender !== 'all') products = products.filter((p) => p.gender === state.gender || p.gender === 'unisex');
     if (state.categories.length) products = products.filter((p) => state.categories.includes(p.collection_type));
     if (state.brandFilter) products = products.filter((p) => (p.brand || '').toLowerCase() === state.brandFilter.toLowerCase());
+    if (state.styleFilter) {
+      const kw = state.styleFilter.toLowerCase();
+      products = products.filter((p) => {
+        const hay = [p.collection_type, p.category, ...(p.style || []), p.name, p.description].filter(Boolean).join(' ').toLowerCase();
+        return hay.includes(kw);
+      });
+    }
     if (state.sizes.length) products = filterBySize(products, state.sizes);
     if (state.condition !== 'all') products = products.filter((p) => (p.condition || '').toLowerCase().includes(state.condition.toLowerCase()));
     products = filterByPrice(products, state.priceMin, state.priceMax);

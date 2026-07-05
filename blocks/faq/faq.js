@@ -60,6 +60,11 @@ function parseBlock(block) {
 export default function decorate(block) {
   const { cfg, items } = parseBlock(block);
 
+  // title: last word → orange <em> accent (matches other hero blocks)
+  const tParts = cfg['title'].split(' ');
+  const tLast = tParts.pop();
+  const tHead = tParts.join(' ');
+
   // group items by their group name, preserving first-seen order
   const order = [];
   const groups = {};
@@ -72,7 +77,7 @@ export default function decorate(block) {
     <section class="faq-hero">
       <div class="container">
         <p class="faq-kicker">${cfg['kicker']}</p>
-        <h1 class="faq-title">${cfg['title']}</h1>
+        <h1 class="faq-title">${tHead} <em>${tLast}</em></h1>
         <p class="faq-sub">${cfg['subtitle']}</p>
       </div>
     </section>

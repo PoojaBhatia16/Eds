@@ -27,6 +27,7 @@ export async function loadProducts(dataSource = '/data/products.json') {
    Shopify auto-serves WebP/AVIF by Accept header, so format is already optimal. */
 export function resizeImg(url, w = 400) {
   if (!url) return url;
+  if (url.startsWith('data:')) return url;          // base64 seller uploads — never rewrite
   if (/[?&]width=\d+/.test(url))            return url.replace(/([?&]width=)\d+/, `$1${w}`);
   if (/_\d+x\.(jpe?g|png|webp)/i.test(url)) return url.replace(/_\d+x(\.(?:jpe?g|png|webp))/i, `_${w}x$1`);
   return url + (url.includes('?') ? '&' : '?') + 'width=' + w;

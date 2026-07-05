@@ -1,7 +1,10 @@
 /* blocks/orders/orders.css — order history, RE:WEAR design system */
 
 .orders-page {
-  padding: 40px var(--sp-lg, 24px) 80px;
+  padding: 40px var(--sp-lg, 24px) 100px;
+  min-height: 60vh;
+  position: relative;
+  z-index: 1;
   max-width: 860px;
   margin: 0 auto;
 }
