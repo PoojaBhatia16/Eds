@@ -69,7 +69,7 @@ export function ensureAuth(message = '') {
   if (isLoggedIn()) return true;
   sessionStorage.setItem('rewear_redirect', window.location.href);
   if (message) sessionStorage.setItem('rewear_auth_msg', message);
-  window.location.href = 'login.html';
+  window.location.href = '/login';
   return false;
 }
 
@@ -87,7 +87,7 @@ export function hasRole(role) {
   requireAuth() — call at top of any page script.
   If not logged in, saves intended URL and redirects to login.
 */
-export function requireAuth(redirectTo = 'login.html') {
+export function requireAuth(redirectTo = '/login') {
   if (!isLoggedIn()) {
     sessionStorage.setItem('rewear_redirect', window.location.href);
     window.location.href = redirectTo;
@@ -100,7 +100,7 @@ export function requireAuth(redirectTo = 'login.html') {
   requireRole('seller') or requireRole('admin')
   Admin always passes (admin > seller > buyer in access hierarchy).
 */
-export function requireRole(role, redirectTo = 'index.html') {
+export function requireRole(role, redirectTo = '/') {
   if (!requireAuth()) return false; /* not logged in → login page */
 
   const user = getCurrentUser();
@@ -123,7 +123,7 @@ export function requireRole(role, redirectTo = 'index.html') {
 /* ── LOGOUT ── */
 export function logout() {
   localStorage.removeItem(SESSION_KEY);
-  window.location.href = 'index.html';
+  window.location.href = '/';
 }
 
 /* ══════════════════════════
@@ -211,7 +211,7 @@ export function syncNav() {
       if (drop && !document.getElementById('adminDropdownLink')) {
         const divider = drop.querySelector('.nav-hover-divider');
         const adminLink = document.createElement('a');
-        adminLink.href = 'admin.html';
+        adminLink.href = '/admin';
         adminLink.className = 'nav-hover-item';
         adminLink.id = 'adminDropdownLink';
         adminLink.style.color = 'var(--terra)';
@@ -276,7 +276,7 @@ export function syncNav() {
       footAuth.onclick = (e) => { e.preventDefault(); logout(); };
     } else {
       footAuth.textContent = 'Sign In';
-      footAuth.href = 'login.html';
+      footAuth.href = '/login';
       footAuth.onclick = null;
     }
   }

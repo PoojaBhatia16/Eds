@@ -70,7 +70,7 @@ export function buildProductCard(product) {
 
   return `
     <article class="product-card${sold ? ' is-sold' : ''}" data-id="${id}">
-      <a href="product.html?id=${id}" style="text-decoration:none;color:inherit;">
+      <a href="/product?id=${id}" style="text-decoration:none;color:inherit;">
         <div class="product-card-img">
           ${sold ? '<div class="sold-overlay"><span>Sold Out</span></div>' : ''}
           ${imgSrc
