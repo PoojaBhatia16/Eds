@@ -183,15 +183,23 @@ export default async function decorate(block) {
     if (!products.length) { grid.innerHTML = ''; empty.hidden = false; return; }
     empty.hidden = true;
 
-    grid.innerHTML = products.map((p) => {
+    grid.innerHTML = products.map((p, i) => {
       const saving = p.originalPrice ? Math.round((1 - p.price / p.originalPrice) * 100) : 0;
       const sold = isSold(p.id);
       const sz = p.size || (Array.isArray(p.sizes) ? p.sizes[0] : '') || '';
+      /* First row of cards is above the fold — the very first is usually the
+         LCP element. Lazy-loading it forces the browser to delay the fetch
+         until layout confirms it's near-viewport, hurting LCP. Eager-load
+         the first few cards; lazy-load the rest below the fold. */
+      const eager = i < 4;
+      const imgAttrs = eager
+        ? `loading="eager"${i === 0 ? ' fetchpriority="high"' : ''}`
+        : 'loading="lazy"';
       return `
         <article class="product-card${sold ? ' is-sold' : ''}" data-id="${p.id}" role="link" aria-label="${p.name}">
           <div class="product-card-img">
             ${sold ? '<div class="sold-overlay"><span>Sold Out</span></div>' : ''}
-            ${p.images?.[0] ? `<img src="${p.images[0]}" alt="${p.name}" loading="lazy">` : '<div class="img-placeholder"></div>'}
+            ${p.images?.[0] ? `<img src="${p.images[0]}" alt="${p.name}" ${imgAttrs}>` : '<div class="img-placeholder"></div>'}
             <button class="product-wishlist" data-id="${p.id}" aria-label="Wishlist">♡</button>
           </div>
           <div class="product-card-body">
