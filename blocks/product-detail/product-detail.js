@@ -122,7 +122,7 @@ export default async function decorate(block) {
     if (isSold(p.id)) gallery.classList.add('is-sold');
     const sold = isSold(p.id) ? '<div class="sold-overlay"><span>Sold Out</span></div>' : '';
     gallery.innerHTML = sold + p.images.map((src, i) =>
-      `<img class="pp-gallery-img" src="${resizeImg(src, 800)}" alt="${p.name} — view ${i + 1}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" data-full="${src}">`
+      `<img class="pp-gallery-img" src="${resizeImg(src, 800)}" alt="${p.name} — view ${i + 1}" loading="${i === 0 ? 'eager' : 'lazy'}" fetchpriority="${i === 0 ? 'high' : 'auto'}" decoding="async" data-full="${src}">`
     ).join('');
     gallery.querySelectorAll('.pp-gallery-img').forEach((img) => {
       img.addEventListener('click', () => openLightbox(img.dataset.full));

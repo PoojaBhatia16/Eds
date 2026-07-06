@@ -79,7 +79,7 @@ export function buildProductCard(product) {
                 alt="${name}"
                 loading="lazy"
                 decoding="async"
-                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+                data-fallback-img
               >
               <div class="img-placeholder" style="display:none;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5L5 20"/></svg></div>`
             : `<div class="img-placeholder"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5L5 20"/></svg></div>`
@@ -89,7 +89,6 @@ export function buildProductCard(product) {
             data-id="${id}"
             type="button"
             aria-label="Add to wishlist"
-            onclick="event.preventDefault();event.stopPropagation()"
           >♡</button>
         </div>
         <div class="product-card-body">
@@ -122,6 +121,15 @@ export function renderProducts(products, gridSelector) {
   }
 
   grid.innerHTML = products.map(buildProductCard).join('');
+
+  /* CSP-clean image fallback (replaces the old inline onerror) */
+  grid.querySelectorAll('img[data-fallback-img]').forEach((img) => {
+    img.addEventListener('error', () => {
+      img.style.display = 'none';
+      const ph = img.nextElementSibling;
+      if (ph) ph.style.display = 'flex';
+    });
+  });
 }
 
 /* ── FILTERS ───────────────────────────────── */

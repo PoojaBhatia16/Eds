@@ -1,4 +1,6 @@
-/* add global styles that can be loaded post LCP here */
+/* RE:WEAR — global shared components for EDS (nav, buttons, cards, footer, modal).
+   Load from styles/lazy-styles.css (boilerplate lazy phase). */
+
 /* ============================================
    COMPONENTS.CSS — Clean single source
    ============================================ */
@@ -486,4 +488,31 @@
 .pp-add-btn.is-own-listing, #addToCartBtn.is-own-listing:disabled {
   background: #8A7A66 !important; border-color: #8A7A66 !important;
   cursor: not-allowed; opacity: 0.9;
+}
+/* ── PERFORMANCE: reserve space + prevent layout shift (CLS) ── */
+/* Any block image container gets a neutral placeholder so there's no flash/shift while loading */
+.product-card-img,
+.cart-item-img,
+.order-item-img,
+.admin-card-img,
+.listing-card-img,
+.brand-tile-logo,
+.pp-gallery,
+.collection-card-imgs { background: var(--bg-dark, #D4CEB8); }
+
+/* images fill their reserved box, cropped, no reflow */
+.cart-item-img img,
+.order-item-img img,
+.admin-card-img img,
+.listing-card-img img,
+.profile-mini-grid .product-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* fixed-size thumbnails keep their box even before the image arrives */
+.cart-item-img { width: 90px; height: 112px; border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+.order-item-img { width: 56px; height: 56px; border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+
+/* content-visibility: skip rendering work for off-screen sections (big TBT win) */
+.product-grid, .editorial-carousel, .reviews, .brands-grid, .hiw-promises {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
 }
