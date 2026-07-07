@@ -1,36 +1,13 @@
 /*
- * blocks/footer/footer.js - RE:WEAR site footer (CONFIG-DRIVEN, cart-style)
+ * blocks/footer/footer.js — RE:WEAR site footer
  *
- * Content is authored in the `/footer` document as ONE "Footer" block table,
- * exactly like the cart block. The boilerplate loadFooter() creates an empty
- * footer block, so this module fetches `/footer.plain.html`, reads the
- * authored Footer table, and renders it into the RE:WEAR footer layout.
- *
- * -- HOW TO AUTHOR the /footer document --
- * Make a block table. First row = one cell containing the word "Footer".
- * Then one row per section, first cell = key, second cell = value:
- *
- *   | Footer  |                                                          |
- *   | Brand   | RE:WEAR                                                  |
- *   | Tagline | Curated vintage and thrift fashion...                    |
- *   | Explore | [Home](/) [Browse](/browse) [Discover](/collection)      |
- *   | Shop    | [Women's](/browse?gender=women) [Men's](/browse?gender=men)|
- *   | Account | [My Account](/profile) [Orders](/orders) [Sign In](/login)|
- *   | Bottom  | (c) 2026 RE:WEAR                                          |
- *
- * Reserved keys: Brand, Tagline, Bottom. Any OTHER key becomes a link column
- * (the key is the column title, the links in the 2nd cell become the list).
- * A link to /login automatically gets id="footerAuthLink" so Sign In/Out works.
- * Multiple "Bottom" rows are allowed (one <span> each).
- *
- * If the document/table is missing, the built-in fallback renders so the
- * footer is never empty. Styling is global (styles/lazy-styles.css).
+ * The boilerplate's loadFooter() creates an empty `footer` block and calls this.
+ * We fill it with the RE:WEAR footer in code (no /footer doc needed).
+ * Footer styling is global (styles/lazy-styles.css), so no CSS file needed.
+ * URLs are extensionless to match EDS routing.
  */
 
-const RESERVED = ['brand', 'tagline', 'bottom'];
-
-/* -- Built-in fallback (used only if the /footer table is missing/empty) -- */
-const FALLBACK_HTML = `
+const FOOTER_HTML = `
   <div class="container">
     <div class="footer-grid">
       <div>
@@ -66,121 +43,22 @@ const FALLBACK_HTML = `
           <li><a href="/login" id="footerAuthLink">Sign In</a></li>
         </ul>
       </div>
+      <div>
+        <div class="footer-col-title">Social</div>
+        <ul class="footer-links footer-social">
+          <li><a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><svg class="footer-soc-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>Instagram</a></li>
+          <li><a href="https://pinterest.com" target="_blank" rel="noopener noreferrer"><svg class="footer-soc-ico" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 4 5.6 4 8.7c0 1.9.7 3.6 2.3 4.2.3.1.5 0 .5-.3l.2-.8c.1-.2 0-.3-.1-.5-.4-.5-.7-1.1-.7-2C6.5 7.2 8.3 5 11.4 5c2.7 0 4.2 1.7 4.2 3.9 0 2.9-1.3 5.4-3.2 5.4-1 0-1.8-.9-1.6-1.9.3-1.3.9-2.6.9-3.5 0-.8-.4-1.5-1.3-1.5-1.1 0-1.9 1.1-1.9 2.6 0 .9.3 1.6.3 1.6l-1.3 5.4c-.4 1.6-.1 3.5 0 3.7.1.1.3 0 .3 0 .1-.1 1.5-1.9 2-3.6l.7-2.8c.4.7 1.4 1.3 2.5 1.3 3.3 0 5.5-3 5.5-7C20 5.5 17.2 2 12 2z"/></svg>Pinterest</a></li>
+          <li><a href="/contact"><svg class="footer-soc-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>Contact</a></li>
+        </ul>
+      </div>
     </div>
     <div class="footer-bottom">
-      <span class="footer-copy">&copy; 2026 RE:WEAR</span>
+      <span class="footer-copy">© 2026 RE:WEAR</span>
       <span class="footer-copy">Made for sustainable fashion</span>
     </div>
   </div>
 `;
 
-/*
- * Read the authored Footer block table out of the parsed document body.
- * In .plain.html a block table becomes:
- *   <div class="footer">
- *     <div><div>KEY</div><div>VALUE</div></div>  ... one per row
- *   </div>
- * Returns an array of { key, valueEl } rows, or [] if none.
- */
-function readRows(dom) {
-  const block = dom.querySelector('.footer') || dom.querySelector('div > div');
-  if (!block) return [];
-  return [...block.children].map((row) => {
-    const cells = row.children;
-    if (cells.length < 2) return null;
-    return { key: cells[0].textContent.trim(), valueEl: cells[1] };
-  }).filter(Boolean);
-}
-
-function buildFromRows(rows) {
-  if (!rows.length) return null;
-
-  let brand = '';
-  let tagline = '';
-  const columns = [];
-  const bottom = [];
-
-  rows.forEach(({ key, valueEl }) => {
-    const k = key.toLowerCase();
-    if (k === 'brand') { brand = valueEl.textContent.trim(); return; }
-    if (k === 'tagline') { tagline = valueEl.textContent.trim(); return; }
-    if (k === 'bottom') { bottom.push(valueEl.textContent.trim()); return; }
-
-    /* any other key = a link column.
-       Prefer real authored <a> links; if none, fall back to plain text where
-       each item is "Label | /url" (or "Label > /url"), split on newline/comma. */
-    let links = [...valueEl.querySelectorAll('a')].map((a) => ({
-      href: a.getAttribute('href'),
-      text: a.textContent.trim(),
-    }));
-
-    if (!links.length) {
-      const raw = (valueEl.innerText || valueEl.textContent || '').trim();
-      links = raw
-        .split(/[\n,]+/)
-        .map((s) => s.trim())
-        .filter(Boolean)
-        .map((item) => {
-          const m = item.split(/\s*[|>]\s*/); // "Label | /url"
-          const text = (m[0] || '').trim();
-          const href = (m[1] || '#').trim();
-          return text ? { text, href } : null;
-        })
-        .filter(Boolean);
-    }
-
-    if (links.length) columns.push({ title: key, links });
-  });
-
-  if (!brand && !columns.length) return null;
-
-  const brandCol = `
-    <div>
-      <div class="footer-brand">${brand || 'RE:WEAR'}</div>
-      ${tagline ? `<p class="footer-tagline">${tagline}</p>` : ''}
-    </div>`;
-
-  const linkCols = columns.map((col) => `
-    <div>
-      <div class="footer-col-title">${col.title}</div>
-      <ul class="footer-links">
-        ${col.links.map((l) => {
-          const isAuth = (l.href || '').replace(/\/$/, '').endsWith('/login');
-          return `<li><a href="${l.href}"${isAuth ? ' id="footerAuthLink"' : ''}>${l.text}</a></li>`;
-        }).join('')}
-      </ul>
-    </div>`).join('');
-
-  const bottomHTML = bottom.length
-    ? bottom.map((t) => `<span class="footer-copy">${t}</span>`).join('')
-    : `<span class="footer-copy">&copy; 2026 RE:WEAR</span>`;
-
-  return `
-    <div class="container">
-      <div class="footer-grid">
-        ${brandCol}
-        ${linkCols}
-      </div>
-      <div class="footer-bottom">${bottomHTML}</div>
-    </div>`;
-}
-
-export default async function decorate(block) {
-  let html = FALLBACK_HTML;
-
-  try {
-    const resp = await fetch('/footer.plain.html');
-    if (resp.ok) {
-      const text = await resp.text();
-      const dom = new DOMParser().parseFromString(text, 'text/html').body;
-      const built = buildFromRows(readRows(dom));
-      if (built) html = built;
-    }
-  } catch (e) {
-    // network/parse error -> keep fallback, never break the footer
-    // eslint-disable-next-line no-console
-    console.warn('Footer doc load failed, using fallback:', e.message);
-  }
-
-  block.innerHTML = html;
+export default function decorate(block) {
+  block.innerHTML = FOOTER_HTML;
 }
