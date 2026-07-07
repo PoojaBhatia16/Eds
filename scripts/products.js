@@ -24,11 +24,14 @@ export async function loadProducts(dataSource = '/data/products.json') {
 
 /* ── IMAGE RESIZE (Shopify/Westside CDN supports ?width=) ──
    Cards show ~300-400px, so request 400 instead of 990 → ~75% smaller download.
-   Shopify auto-serves WebP/AVIF by Accept header, so format is already optimal. */
+   Shopify auto-serves WebP/AVIF by Accept header, so format is already optimal.
+   Local paths (starting with '/') are pre-optimized WebP files served from our
+   own origin — they must NOT be rewritten (no ?width= support, and mangling the
+   '_800x' in a filename would 404). Pass them through untouched. */
 export function resizeImg(url, w = 400) {
   if (!url) return url;
   if (url.startsWith('data:')) return url;          // base64 seller uploads — never rewrite
-  if (url.startsWith('/')) return url;              // local repo images (already sized webp)
+  if (url.startsWith('/')) return url;               // local pre-optimized asset — never rewrite
   if (/[?&]width=\d+/.test(url))            return url.replace(/([?&]width=)\d+/, `$1${w}`);
   if (/_\d+x\.(jpe?g|png|webp)/i.test(url)) return url.replace(/_\d+x(\.(?:jpe?g|png|webp))/i, `_${w}x$1`);
   return url + (url.includes('?') ? '&' : '?') + 'width=' + w;
@@ -53,13 +56,13 @@ export function isRemoved(id) {
 }
 
 /* ── BUILD ONE CARD ────────────────────────── */
-export function buildProductCard(product, index = 99) {
-  const eager = index < 4; // first row of the grid = LCP candidates
+export function buildProductCard(product, eager = false) {
   const { id, name, brand, price, originalPrice, images, gender } = product;
 
   const saving = originalPrice ? Math.round((1 - price / originalPrice) * 100) : 0;
   const fmt    = n => '₹' + Number(n).toLocaleString('en-IN');
   const imgSrc = resizeImg(images?.[0] || '', 400);
+  const imgAttrs = eager ? 'loading="eager" fetchpriority="high"' : 'loading="lazy" decoding="async"';
 
   /* each listing is a single, one-of-a-kind piece — one size only */
   const size     = product.size || (Array.isArray(product.sizes) ? product.sizes[0] : '') || '';
@@ -78,10 +81,9 @@ export function buildProductCard(product, index = 99) {
           ${imgSrc
             ? `<img
                 src="${imgSrc}"
+                width="300" height="400"
                 alt="${name}"
-                loading="${eager ? 'eager' : 'lazy'}"
-                ${eager ? 'fetchpriority="high"' : ''}
-                decoding="async"
+                ${imgAttrs}
                 data-fallback-img
               >
               <div class="img-placeholder" style="display:none;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5L5 20"/></svg></div>`
@@ -123,7 +125,7 @@ export function renderProducts(products, gridSelector) {
     return;
   }
 
-  grid.innerHTML = products.map((p, i) => buildProductCard(p, i)).join('');
+  grid.innerHTML = products.map((p, i) => buildProductCard(p, i < 4)).join('');
 
   /* CSP-clean image fallback (replaces the old inline onerror) */
   grid.querySelectorAll('img[data-fallback-img]').forEach((img) => {
