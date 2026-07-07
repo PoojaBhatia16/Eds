@@ -330,6 +330,9 @@
   background: #F5F3EF;
 }
 .browse-grid .product-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: transform 600ms cubic-bezier(0.4,0,0.2,1);
 }
 .browse-grid .product-card:hover .product-card-img img { transform: scale(1.06); }

@@ -199,7 +199,7 @@ export default async function decorate(block) {
         <article class="product-card${sold ? ' is-sold' : ''}" data-id="${p.id}" role="link" aria-label="${p.name}">
           <div class="product-card-img">
             ${sold ? '<div class="sold-overlay"><span>Sold Out</span></div>' : ''}
-            ${p.images?.[0] ? `<img src="${resizeImg(p.images[0], 400)}" alt="${p.name}" ${imgAttrs}>` : '<div class="img-placeholder"></div>'}
+            ${p.images?.[0] ? `<img src="${resizeImg(p.images[0], 400)}" alt="${p.name}" width="300" height="400" ${imgAttrs}>` : '<div class="img-placeholder"></div>'}
             <button class="product-wishlist" data-id="${p.id}" aria-label="Wishlist">♡</button>
           </div>
           <div class="product-card-body">
