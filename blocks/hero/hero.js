@@ -53,10 +53,21 @@ export default function decorate(block) {
       modelImg.setAttribute('loading', 'eager');
       modelImg.setAttribute('fetchpriority', 'high');
       modelImg.setAttribute('decoding', 'async');
+      // CLS fix: explicit dimensions so the browser reserves space before
+      // hero.css (which loads lazily) pins the image to the 520px wrap.
+      if (!modelImg.getAttribute('width')) {
+        modelImg.setAttribute('width', '780');
+        modelImg.setAttribute('height', '1040');
+      }
     }
     grid.querySelector('.hero-model-wrap').prepend(model);
   }
   if (thumb) {
+    const thumbImg = thumb.tagName === 'IMG' ? thumb : thumb.querySelector('img');
+    if (thumbImg && !thumbImg.getAttribute('width')) {
+      thumbImg.setAttribute('width', '600');
+      thumbImg.setAttribute('height', '750');
+    }
     grid.querySelector('.hero-thumb').prepend(thumb);
   }
 }

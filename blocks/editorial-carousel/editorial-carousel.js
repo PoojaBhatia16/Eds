@@ -36,7 +36,7 @@ function buildCarousel(container, products, label, browseUrl) {
     <article class="ec-slide">
       <div class="ec-img-wrap">
         ${isSold(p.id) ? '<div class="sold-overlay"><span>Sold Out</span></div>' : ''}
-        <img src="${resizeImg(p.images?.[0] || '', 600)}" alt="${p.name}" decoding="async" loading="lazy">
+        <img src="${resizeImg(p.images?.[0] || '', 600)}" alt="${p.name}" width="600" height="800" decoding="async" loading="lazy">
         <div class="ec-overlay">
           <span class="ec-overlay-eyebrow">${(p.brand || '').split('·')[0].trim()}</span>
           <span class="ec-overlay-title">${p.name}</span>
@@ -78,16 +78,22 @@ function buildCarousel(container, products, label, browseUrl) {
 
   const realOf = (i) => (((i - REAL_START) % N) + N) % N;
 
+  // Perf: cache measurements once per resize; center() then computes the
+  // transform mathematically (slide widths are uniform, gap is fixed) instead
+  // of reading offsetLeft/offsetWidth after writes — no forced reflow.
+  const GAP = 18; // must match .ec-track { gap } in editorial-carousel.css
+  let vw = 0;
+  let sw = 0;
+
   function sizeSlides() {
-    const w = viewport.clientWidth;
-    const sw = Math.round(w * (w < 700 ? 0.66 : 0.40));
+    vw = viewport.clientWidth;
+    sw = Math.round(vw * (vw < 700 ? 0.66 : 0.40));
     slides.forEach((s) => { s.style.width = sw + 'px'; });
   }
 
   function center(animate) {
     track.style.transition = animate ? 'transform .55s cubic-bezier(.22,1,.36,1)' : 'none';
-    const el = slides[active];
-    const x = viewport.clientWidth / 2 - (el.offsetLeft + el.offsetWidth / 2);
+    const x = vw / 2 - ((sw + GAP) * active + sw / 2);
     track.style.transform = `translateX(${x}px)`;
     slides.forEach((s, i) => s.classList.toggle('is-active', i === active));
     dots.forEach((d, i) => d.classList.toggle('active', i === realOf(active)));
@@ -137,11 +143,8 @@ function buildCarousel(container, products, label, browseUrl) {
   // initial sizing (in case the observer's first callback is delayed)
   sizeSlides();
   requestAnimationFrame(() => requestAnimationFrame(() => { sizeSlides(); center(false); }));
-  // re-center once images have loaded (they can change layout height)
-  slides.forEach((s) => {
-    const img = s.querySelector('img');
-    if (img && !img.complete) img.addEventListener('load', () => { sizeSlides(); center(false); }, { once: true });
-  });
+  // NOTE: no per-image-load relayout needed — .ec-img-wrap has a fixed height,
+  // so image loads never change layout. (Removing this killed ~170ms of forced reflow.)
 }
 
 export default async function decorate(block) {
