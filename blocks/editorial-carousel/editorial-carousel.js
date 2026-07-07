@@ -72,7 +72,9 @@ function buildCarousel(container, products, label, browseUrl) {
   const slides = [...container.querySelectorAll('.ec-slide')];
   const dots = [...container.querySelectorAll('.ec-dot')];
 
-  base.forEach((p) => { const im = new Image(); im.src = resizeImg(p.images?.[0] || '', 600); });
+  // Preload slide images only when the browser is idle — don't compete with LCP
+  const preload = () => base.forEach((p) => { const im = new Image(); im.src = resizeImg(p.images?.[0] || '', 600); });
+  if ('requestIdleCallback' in window) requestIdleCallback(preload); else setTimeout(preload, 1200);
 
   const realOf = (i) => (((i - REAL_START) % N) + N) % N;
 
