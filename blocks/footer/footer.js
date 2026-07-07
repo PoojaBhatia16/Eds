@@ -106,11 +106,29 @@ function buildFromRows(rows) {
     if (k === 'tagline') { tagline = valueEl.textContent.trim(); return; }
     if (k === 'bottom') { bottom.push(valueEl.textContent.trim()); return; }
 
-    /* any other key = a link column */
-    const links = [...valueEl.querySelectorAll('a')].map((a) => ({
+    /* any other key = a link column.
+       Prefer real authored <a> links; if none, fall back to plain text where
+       each item is "Label | /url" (or "Label > /url"), split on newline/comma. */
+    let links = [...valueEl.querySelectorAll('a')].map((a) => ({
       href: a.getAttribute('href'),
       text: a.textContent.trim(),
     }));
+
+    if (!links.length) {
+      const raw = (valueEl.innerText || valueEl.textContent || '').trim();
+      links = raw
+        .split(/[\n,]+/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map((item) => {
+          const m = item.split(/\s*[|>]\s*/); // "Label | /url"
+          const text = (m[0] || '').trim();
+          const href = (m[1] || '#').trim();
+          return text ? { text, href } : null;
+        })
+        .filter(Boolean);
+    }
+
     if (links.length) columns.push({ title: key, links });
   });
 
