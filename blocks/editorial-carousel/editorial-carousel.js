@@ -48,7 +48,7 @@ function buildCarousel(container, products, label, browseUrl) {
   container.innerHTML = `
     <div class="section-header">
       <h2 class="section-title">${label}</h2>
-      <a href="${browseUrl}" class="see-more">see more →</a>
+      <a href="${browseUrl}" class="see-more" aria-label="See more ${label}">see more →</a>
     </div>
     <div class="ec-section">
       <div class="ec-header">
@@ -64,7 +64,7 @@ function buildCarousel(container, products, label, browseUrl) {
           <button class="ec-arrow ec-next" aria-label="Next">›</button>
         </div>
       </div>
-      <div class="ec-footer"><a href="${browseUrl}" class="ec-discover">DISCOVER MORE →</a></div>
+      <div class="ec-footer"><a href="${browseUrl}" class="ec-discover" aria-label="Discover more ${label}">DISCOVER MORE →</a></div>
     </div>`;
 
   const viewport = container.querySelector('.ec-viewport');

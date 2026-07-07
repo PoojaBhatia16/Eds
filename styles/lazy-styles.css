@@ -526,3 +526,8 @@
 .faq-title em, .browse-banner-title em {
   color: #954711;
 }
+
+/* ── ACCESSIBILITY: white-on-orange buttons were 4.23:1 (needs 4.5).
+   #BC5915 = 4.59:1 — visually near-identical to the brand orange. ── */
+.btn-primary { background: #BC5915; border-color: #BC5915; }
+.btn-primary:hover { background: #A84E13; border-color: #A84E13; }
