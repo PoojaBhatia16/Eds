@@ -1,17 +1,17 @@
 /*
  * blocks/hero/hero.js — RE:WEAR editorial hero (3-column)
  *
- * Author it as a 2-cell table (row 1 = name "Hero", row 2 = two image cells):
- *   | Hero |                       |
+ * Author as a 2-cell table (row 1 = "Hero", row 2 = two image cells):
+ *   | Hero |                              |
  *   | (model image)  | (new-arrival image) |
  *
- * The block keeps EDS's optimized <picture> elements and slots them into the
- * layout. All copy is fixed editorial text baked in below (edit here if needed).
+ * If you author only ONE image, the model shows and the thumb slot stays empty.
  */
 
 export default function decorate(block) {
+  // Select <picture> only (NOT "picture, img" — that double-counts the inner img).
   let pics = [...block.querySelectorAll('picture')];
-  if (!pics.length) pics = [...block.querySelectorAll('img')];
+  if (!pics.length) pics = [...block.querySelectorAll('img')]; // fallback if no <picture>
   const model = pics[0] || null;
   const thumb = pics[1] || null;
 
@@ -26,13 +26,9 @@ export default function decorate(block) {
       <p class="hero-sub">RE:WEAR is a curated thrift marketplace. Discover pre-loved fashion, or sell pieces you no longer wear.</p>
       <a href="/browse" class="btn btn-primary hero-cta">Shop Now</a>
     </div>
-
     <div class="hero-center">
-      <div class="hero-model-wrap">
-        <div class="hero-blob"></div>
-      </div>
+      <div class="hero-model-wrap"><div class="hero-blob"></div></div>
     </div>
-
     <div class="hero-right">
       <div class="hero-info">
         <p class="hero-info-text">One-of-a-kind pieces with a story, ready to be yours.</p>
@@ -46,11 +42,18 @@ export default function decorate(block) {
       </div>
     </div>
   `;
-
   block.append(grid);
 
   if (model) {
     model.classList.add('hero-model');
+    // LCP fix: the hero model image is the page's LCP — it must load eagerly
+    // with high priority. EDS defaults authored images to loading="lazy".
+    const modelImg = model.tagName === 'IMG' ? model : model.querySelector('img');
+    if (modelImg) {
+      modelImg.setAttribute('loading', 'eager');
+      modelImg.setAttribute('fetchpriority', 'high');
+      modelImg.setAttribute('decoding', 'async');
+    }
     grid.querySelector('.hero-model-wrap').prepend(model);
   }
   if (thumb) {

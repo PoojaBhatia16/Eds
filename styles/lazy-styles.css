@@ -516,3 +516,13 @@
   content-visibility: auto;
   contain-intrinsic-size: auto 600px;
 }
+
+/* ── ACCESSIBILITY: orange text on light backgrounds needs 4.5:1 contrast ──
+   #C45E1A on linen = 3.08 (fail) → #954711 = 4.79 (pass).
+   Buttons keep the brand orange (white-on-orange is a different, passing pair). */
+.hiw-eyebrow, .faq-kicker, .contact-kicker, .collection-header-eyebrow,
+.hero-eyebrow, .hiw-step-cta, .see-more, .cart-continue,
+.browse-clear-all, .product-orig-save, .hero-title em, .hiw-hero-title em,
+.faq-title em, .browse-banner-title em {
+  color: #954711;
+}
