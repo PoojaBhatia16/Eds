@@ -4,7 +4,7 @@
  * browse-clear-all, browse-active-filters, browse-main, browse-grid.
  */
 
-import { loadProducts, filterBySize, filterByPrice, searchProducts, sortProducts, getCollectionTypes, isSold, resizeImg } from '../../scripts/products.js';
+import { loadProducts, filterBySize, filterByPrice, searchProducts, sortProducts, getCollectionTypes, isSold, resizeImg, buildSrcset, CARD_SIZES } from '../../scripts/products.js';
 import { ensureAuth, getWishlist, saveWishlist } from '../../scripts/auth-guard.js';
 
 const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
@@ -199,7 +199,10 @@ export default async function decorate(block) {
         <article class="product-card${sold ? ' is-sold' : ''}" data-id="${p.id}" role="link" aria-label="${p.name}">
           <div class="product-card-img">
             ${sold ? '<div class="sold-overlay"><span>Sold Out</span></div>' : ''}
-            ${p.images?.[0] ? `<img src="${resizeImg(p.images[0], 400)}" alt="${p.name}" width="300" height="400" ${imgAttrs}>` : '<div class="img-placeholder"></div>'}
+            ${p.images?.[0] ? (() => {
+              const ss = buildSrcset(p.images[0]);
+              return `<img src="${resizeImg(p.images[0], 400)}"${ss ? ` srcset="${ss}" sizes="${CARD_SIZES}"` : ''} alt="${p.name}" width="300" height="400" ${imgAttrs}>`;
+            })() : '<div class="img-placeholder"></div>'}
             <button class="product-wishlist" data-id="${p.id}" aria-label="Wishlist">♡</button>
           </div>
           <div class="product-card-body">
