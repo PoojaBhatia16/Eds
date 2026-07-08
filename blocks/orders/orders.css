@@ -192,7 +192,7 @@
 
 /* ── profile layout styles (shared; copied so /orders renders without profile.css) ── */
 .profile-page {
-  padding-top: 96px !important;
+  padding-top: 56px !important;
   padding-left: var(--sp-lg);
   padding-right: var(--sp-lg);
   padding-bottom: 96px !important;
