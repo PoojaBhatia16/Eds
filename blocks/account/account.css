@@ -606,7 +606,7 @@
 .wl-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 /* ── EDS additions ── */
 .wishlist-page .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
-.wishlist-page .page-header { display: flex; align-items: baseline; justify-content: space-between; padding: 40px 0 28px; }
+.wishlist-page .page-header { display: flex; align-items: baseline; gap: 12px; padding: 40px 0 28px; }
 .wishlist-page .page-title { font-family: var(--font-head); font-size: clamp(28px, 4vw, 44px); font-weight: 700; color: var(--brown); }
 .wishlist-page .page-count { font-size: 13px; color: var(--text-muted); font-weight: 600; }
 .empty-state.is-hidden { display: none; }
