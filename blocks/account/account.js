@@ -14,9 +14,9 @@
  * All the config keys from both old blocks are supported (see DEFAULTS).
  */
 
-import { requireAuth, getCurrentUser, logout, upgradeToSeller, getWishlist } from '../../scripts/auth-guard.js';
-import { loadProducts, getProductById } from '../../scripts/products.js';
-import { getCart } from '../../scripts/cart.js';
+import { requireAuth, getCurrentUser, logout, upgradeToSeller, getWishlist, ensureAuth, saveWishlist } from '../../scripts/auth-guard.js';
+import { loadProducts, getProductById, isSold } from '../../scripts/products.js';
+import { getCart, addItem, getCartCount } from '../../scripts/cart.js';
 
 /* local money formatter (self-contained — no dependency on a shared export) */
 const fmt = (n) => '₹' + Number(n || 0).toLocaleString('en-IN');
@@ -42,6 +42,14 @@ const DEFAULTS = {
   'empty title': 'No orders yet',
   'empty text': "When you place an order, it'll show up here.",
   'empty cta text': 'Start Shopping',
+  // wishlist view
+  'wishlist title': 'Your Wishlist',
+  'wishlist empty text': 'Your wishlist is empty.',
+  'wishlist empty cta': 'Browse Finds →',
+  'add cta': 'Add to Bag',
+  'sold label': 'Sold Out',
+  'own label': 'Your listing',
+  'login prompt': 'Log in to add items to your bag',
 };
 
 function readConfig(block) {
@@ -192,11 +200,144 @@ function renderOrdersList(box, myOrders, cfg) {
   }).join('')}</div>`;
 }
 
+/* ── WISHLIST VIEW ──
+   Kept as its own full-width layout (page-header + product grid), matching the
+   former standalone wishlist block — no account sidebar, so it looks identical
+   to before. */
+function isOwnListing(p) {
+  const u = getCurrentUser();
+  return !!(u && ((p.sellerId && String(p.sellerId) === String(u.id)) || (p.sellerEmail && p.sellerEmail.toLowerCase() === (u.email || '').toLowerCase())));
+}
+
+function wlToast(msg) {
+  let t = document.getElementById('wlToast');
+  if (!t) { t = document.createElement('div'); t.id = 'wlToast'; t.className = 'wl-toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  void t.offsetWidth;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function wlUpdateCartBadge() {
+  const badge = document.querySelector('.cart-badge');
+  if (!badge) return;
+  const count = getCartCount();
+  badge.textContent = count || '';
+  badge.style.display = count ? 'flex' : 'none';
+}
+
+async function renderWishlist(block, cfg) {
+  block.innerHTML = `
+    <div class="container wishlist-page">
+      <div class="page-header">
+        <h1 class="page-title">${esc(cfg['wishlist title'])}</h1>
+        <span class="page-count" id="wishlistCount">—</span>
+      </div>
+      <div class="product-grid" id="wishlistGrid"></div>
+      <div class="empty-state is-hidden" id="wishlistEmpty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <p>${esc(cfg['wishlist empty text'])}</p>
+        <a href="${cfg['browse path']}" class="btn btn-primary mt-8">${esc(cfg['wishlist empty cta'])}</a>
+      </div>
+    </div>
+  `;
+
+  const grid = block.querySelector('#wishlistGrid');
+  const empty = block.querySelector('#wishlistEmpty');
+  const count = block.querySelector('#wishlistCount');
+  const showEmpty = () => { grid.innerHTML = ''; empty.classList.remove('is-hidden'); count.textContent = '0 items'; };
+
+  const ids = getWishlist();
+  if (!ids.length) return showEmpty();
+
+  const all = await loadProducts();
+  const products = ids.map((id) => getProductById(all, id)).filter(Boolean);
+  if (!products.length) return showEmpty();
+
+  count.textContent = `${products.length} item${products.length !== 1 ? 's' : ''}`;
+
+  grid.innerHTML = products.map((p) => {
+    const own = isOwnListing(p);
+    const sold = isSold(p.id);
+    const label = own ? cfg['own label'] : sold ? cfg['sold label'] : cfg['add cta'];
+    const cls = own ? ' is-own-listing' : sold ? ' is-sold-out' : '';
+    return `
+      <article class="product-card${sold ? ' is-sold' : ''}" data-id="${p.id}" role="link" aria-label="${esc(p.name)}">
+        <div class="product-card-img">
+          ${sold ? `<div class="sold-overlay"><span>${esc(cfg['sold label'])}</span></div>` : ''}
+          ${p.images?.[0] ? `<img src="${p.images[0]}" alt="${esc(p.name)}" loading="lazy" class="wl-img">` : '<div class="img-placeholder"></div>'}
+          <button class="product-wishlist active" data-remove="${p.id}" aria-label="Remove from wishlist">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </button>
+        </div>
+        <div class="product-card-body">
+          <p class="product-brand">${esc(p.brand?.split('·')[0]?.trim() || '')}</p>
+          <p class="product-name">${esc(p.name)}</p>
+          <div class="product-pricing">
+            <span class="product-price">${fmt(p.price)}</span>
+            ${p.originalPrice ? `<span class="product-orig">${fmt(p.originalPrice)}</span>` : ''}
+          </div>
+          <button class="wl-add-cart${cls}" data-add="${p.id}" ${sold ? 'disabled' : ''}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+            <span>${esc(label)}</span>
+          </button>
+        </div>
+      </article>`;
+  }).join('');
+
+  grid.querySelectorAll('.wl-img').forEach((img) => { img.onerror = () => { img.style.visibility = 'hidden'; }; });
+
+  grid.addEventListener('click', (e) => {
+    if (e.target.closest('button')) return;
+    const card = e.target.closest('.product-card');
+    if (card) window.location.href = `${cfg['product path']}?id=${card.dataset.id}`;
+  });
+
+  grid.querySelectorAll('[data-remove]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.remove;
+      let wl = getWishlist();
+      wl = wl.filter((i) => String(i) !== String(id));
+      saveWishlist(wl);
+      btn.closest('.product-card')?.remove();
+      const remaining = grid.querySelectorAll('.product-card').length;
+      count.textContent = `${remaining} item${remaining !== 1 ? 's' : ''}`;
+      if (!remaining) showEmpty();
+    });
+  });
+
+  grid.querySelectorAll('[data-add]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (btn.disabled) return;
+      if (!ensureAuth(cfg['login prompt'])) return;
+      const id = btn.dataset.add;
+      const p = products.find((x) => String(x.id) === String(id));
+      if (!p || isSold(id)) return;
+      if (isOwnListing(p)) { wlToast("You can't add your own listing to the bag"); return; }
+      const size = p.size || (Array.isArray(p.sizes) ? p.sizes[0] : '') || 'One Size';
+      addItem(p, size, 1);
+      wlUpdateCartBadge();
+      btn.classList.add('added');
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg><span>Go to Bag</span>';
+      btn.addEventListener('click', (ev) => { ev.stopPropagation(); window.location.href = cfg['cart path']; });
+    });
+  });
+}
+
 export default async function decorate(block) {
   const cfg = readConfig(block);
   if (!requireAuth(cfg['login path'])) return;
   const user = getCurrentUser();
   if (!user) return;
+
+  /* wishlist variation: own full-width layout (no account sidebar) */
+  if (block.classList.contains('wishlist')) {
+    await renderWishlist(block, cfg);
+    return;
+  }
 
   const isOrders = block.classList.contains('orders');
 
