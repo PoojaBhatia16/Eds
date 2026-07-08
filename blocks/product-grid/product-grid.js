@@ -53,8 +53,6 @@ function buildFilterbarHTML() {
   return `
   <div class="browse-filterbar">
     <div class="browse-filterbar-inner">
-      <button class="browse-clear-all" id="clearFilters">Clear all</button>
-
       <div class="filter-dropdown-wrap">
         <button class="filter-dropdown-btn" data-panel="genderPanel" id="genderBtn">Gender
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
@@ -118,6 +116,8 @@ function buildFilterbarHTML() {
           </div>
         </div>
       </div>
+
+      <button class="browse-clear-all" id="clearFilters">Clear all</button>
 
       <div class="browse-topbar-right">
         <span class="browse-count" id="browseCount">—</span>
