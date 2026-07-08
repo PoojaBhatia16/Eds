@@ -556,7 +556,12 @@
 @media (max-width: 480px)  { .product-grid { grid-template-columns: repeat(2,1fr); } }
 
 /* migrated from inline */
-.wishlist-page { padding: 40px var(--sp-lg) 80px; }
+.wishlist-page {
+  padding-top: 56px !important;
+  padding-left: var(--sp-lg);
+  padding-right: var(--sp-lg);
+  padding-bottom: 100px !important;
+}
 
 /* ── wishlist image + heart (SVG) ── */
 .wl-img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
