@@ -43,7 +43,7 @@ const DEFAULTS = {
   'empty text': "When you place an order, it'll show up here.",
   'empty cta text': 'Start Shopping',
   // wishlist view
-  'wishlist title': 'Your Wishlist',
+  'wishlist title': 'My Wishlist',
   'wishlist empty text': 'Your wishlist is empty.',
   'wishlist empty cta': 'Browse Finds →',
   'add cta': 'Add to Bag',
@@ -231,7 +231,7 @@ async function renderWishlist(block, cfg) {
   block.innerHTML = `
     <div class="container wishlist-page">
       <div class="page-header">
-        <h1 class="page-title">${esc(cfg['wishlist title'])}</h1>
+        <h1 class="page-title">${esc(cfg['wishlist title'] || cfg['title'])}</h1>
         <span class="page-count" id="wishlistCount">—</span>
       </div>
       <div class="product-grid" id="wishlistGrid"></div>
