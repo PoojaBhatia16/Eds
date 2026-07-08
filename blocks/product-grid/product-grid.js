@@ -4,7 +4,9 @@
  * browse-clear-all, browse-active-filters, browse-main, browse-grid.
  */
 
-import { loadProducts, filterBySize, filterByPrice, searchProducts, sortProducts, getCollectionTypes, isSold, fmt } from '../../scripts/products.js';
+import { loadProducts, filterBySize, filterByPrice, searchProducts, sortProducts, getCollectionTypes, isSold } from '../../scripts/products.js';
+
+const fmt = (n) => '₹' + Number(n || 0).toLocaleString('en-IN');
 import { ensureAuth, getWishlist, saveWishlist } from '../../scripts/auth-guard.js';
 
 
