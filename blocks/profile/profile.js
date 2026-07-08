@@ -116,11 +116,90 @@ const buildShell = (cfg) => `
   </div>
 `;
 
+
+/* ── VARIANT: profile (orders) ──
+ * Authored as | Profile (orders) | — same sidebar, main area shows order history
+ * (was the separate `orders` block; merged per EDS variation doctrine). */
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const fmtMoney = (n) => '\u20B9' + Number(n || 0).toLocaleString('en-IN');
+
+function renderOrdersMain(box, user, cfg) {
+  let orders = [];
+  try { orders = JSON.parse(localStorage.getItem('rewear_orders') || '[]'); } catch { orders = []; }
+  const mine = orders
+    .filter((o) => o.userId === user.id || o.userEmail === user.email)
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if (!mine.length) {
+    box.innerHTML = `
+      <div class="orders-empty">
+        <span class="orders-empty-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
+        <h4>No orders yet</h4>
+        <p>When you place an order, it'll show up here.</p>
+        <a href="${cfg['browse path'] || '/browse'}" class="btn btn-primary">Start Shopping</a>
+      </div>`;
+    return;
+  }
+
+  box.innerHTML = `<div class="orders-list">${mine.map((o) => {
+    const date = new Date(o.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    const count = o.items.reduce((s, i) => s + (i.qty || 1), 0);
+    const addr = o.address || {};
+    return `
+      <article class="order-card">
+        <div class="order-card-head">
+          <div>
+            <span class="order-id">Order ${esc(o.id)}</span>
+            <span class="order-date">${date} \u00B7 ${count} item${count !== 1 ? 's' : ''}</span>
+          </div>
+          <span class="order-status order-status--${(o.status || 'processing').toLowerCase()}">${o.status || 'Processing'}</span>
+        </div>
+        <div class="order-items">
+          ${o.items.map((i) => {
+            const tag = i.id ? 'a' : 'div';
+            const link = i.id ? ` href="${cfg['product path'] || '/product'}?id=${encodeURIComponent(i.id)}"` : '';
+            return `<${tag} class="order-item${i.id ? ' is-link' : ''}"${link}>
+              <div class="order-item-img">${i.image ? `<img src="${esc(i.image)}" alt="${esc(i.name)}" loading="lazy" decoding="async">` : ''}</div>
+              <div class="order-item-info">
+                <p class="order-item-name">${esc(i.name)}</p>
+                <p class="order-item-meta">${i.brand ? esc(i.brand) + ' \u00B7 ' : ''}Size ${esc(i.size || '\u2014')} \u00B7 Qty ${i.qty || 1}</p>
+              </div>
+              <span class="order-item-price">${fmtMoney(i.price * (i.qty || 1))}</span>
+            </${tag}>`;
+          }).join('')}
+        </div>
+        <div class="order-card-foot">
+          <div class="order-ship">
+            <span class="order-ship-label">Delivered to</span>
+            <span class="order-ship-val">${esc(addr.firstName || '')} ${esc(addr.lastName || '')}${addr.city ? ', ' + esc(addr.city) : ''}</span>
+          </div>
+          <div class="order-total">
+            <span class="order-total-label">Total</span>
+            <span class="order-total-val">${fmtMoney(o.total)}</span>
+          </div>
+        </div>
+      </article>`;
+  }).join('')}</div>`;
+}
+
 export default async function decorate(block) {
   const cfg = readConfig(block);
   if (!requireAuth(cfg['login path'])) return;
 
+  const isOrders = block.classList.contains('orders');
   block.innerHTML = buildShell(cfg);
+  if (isOrders) {
+    // swap the main content for the orders view; sidebar stays
+    const mainEl = block.querySelector('.profile-main');
+    mainEl.innerHTML = `
+      <div class="profile-section">
+        <div class="profile-section-header"><h3 class="profile-section-title">My Orders</h3></div>
+        <div id="ordersContainer"></div>
+      </div>`;
+    // mark Orders nav item active instead of My Profile
+    block.querySelector('.profile-nav-item.active')?.classList.remove('active');
+    [...block.querySelectorAll('.profile-nav-item')].find((a) => a.textContent.includes('Orders'))?.classList.add('active');
+  }
   const $ = (id) => block.querySelector('#' + id);
   const set = (id, val) => { const el = $(id); if (el) el.textContent = val; };
 
@@ -172,6 +251,8 @@ export default async function decorate(block) {
       location.reload();
     }
   });
+
+  if (isOrders) { renderOrdersMain(block.querySelector('#ordersContainer'), user, cfg); return; }
 
   /* wishlist preview (4) */
   if (wishlist.length) {
