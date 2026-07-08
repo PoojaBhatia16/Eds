@@ -397,6 +397,8 @@
   display: flex; flex-direction: column;
   align-items: center; gap: 12px;
 }
+/* display:flex above overrides the UA [hidden] rule — restore it explicitly */
+.browse-empty[hidden] { display: none; }
 .browse-empty span { font-size: 40px; }
 .browse-empty p { color: var(--text-muted); font-size: 14px; }
 

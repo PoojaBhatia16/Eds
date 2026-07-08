@@ -12,7 +12,7 @@ import { ensureAuth, getCurrentUser, getWishlist, saveWishlist } from '../../scr
 const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
 
 const SHELL = `
-  <div class="container">
+  <div class="container pp-page">
     <nav class="pp-breadcrumb" aria-label="Breadcrumb">
       <a href="/">Home</a><span>/</span>
       <a href="/browse">Browse Finds</a><span>/</span>

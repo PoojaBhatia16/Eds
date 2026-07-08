@@ -3,8 +3,12 @@
    RE:WEAR fonts + colors
    ============================================ */
 
+/* NOTE: .pp-page now sits on the same element as .container; the compound
+   selector out-specifies .container in lazy-styles.css (loaded last), which
+   would otherwise reset the bottom padding to 0. */
+.pp-page.container,
 .pp-page {
-  padding: 0 0 80px;
+  padding: 0 var(--sp-lg) 80px;
   background: var(--bg);
 }
 
