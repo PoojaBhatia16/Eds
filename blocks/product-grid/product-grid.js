@@ -35,14 +35,16 @@ function buildBannerHTML(cfg) {
   const last = parts.pop();
   const head = parts.join(' ');
   return `
-  <div class="container">
-    <div class="browse-banner-inner">
-      <h1 class="browse-banner-title">${head} <em>${last}</em></h1>
-      ${showCount ? `
-      <div class="browse-banner-meta">
-        <span class="browse-banner-count" id="bannerCount">—</span>
-        <span class="browse-banner-label">${label}</span>
-      </div>` : ''}
+  <div class="browse-banner">
+    <div class="container">
+      <div class="browse-banner-inner">
+        <h1 class="browse-banner-title">${head} <em>${last}</em></h1>
+        ${showCount ? `
+        <div class="browse-banner-meta">
+          <span class="browse-banner-count" id="bannerCount">—</span>
+          <span class="browse-banner-label">${label}</span>
+        </div>` : ''}
+      </div>
     </div>
   </div>`;
 }
