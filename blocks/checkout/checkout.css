@@ -72,6 +72,10 @@
 }
 
 /* Main layout */
+/* NOTE: the element is rendered as class="checkout-main container", and
+   .container in lazy-styles.css (loaded last) sets padding: 0 var(--sp-lg),
+   wiping our bottom padding. The compound selector wins on specificity. */
+.checkout-main.container,
 .checkout-main {
   padding: 40px var(--sp-lg) 80px;
   display: grid;
