@@ -3,7 +3,10 @@
    ============================================ */
 
 .profile-page {
-  padding: 88px var(--sp-lg) 80px;
+  padding-top: 96px !important;
+  padding-left: var(--sp-lg);
+  padding-right: var(--sp-lg);
+  padding-bottom: 80px;
 }
 
 .profile-layout {
