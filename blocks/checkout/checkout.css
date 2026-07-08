@@ -204,6 +204,7 @@
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: calc(var(--nav-h) + 20px);
+  margin-bottom: 64px; /* gap above footer */
 }
 
 .checkout-summary-title {
