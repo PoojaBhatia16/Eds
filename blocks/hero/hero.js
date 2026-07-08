@@ -8,58 +8,7 @@
  * If you author only ONE image, the model shows and the thumb slot stays empty.
  */
 
-/* ── VARIANT: hero (banner) ──
- * Authored as | Hero (banner) | — renders the browse-page title banner
- * (was the separate `banner` block; merged per EDS variation doctrine:
- * "avoid creating a dark-hero block when hero (dark) will do").
- * Config rows: Title | Label | Show Count (or old positional style). */
-const BANNER_DEFAULTS = { 'title': 'All Finds', 'label': 'Curated pieces', 'show count': 'true' };
-
-function readBannerConfig(block) {
-  const cfg = { ...BANNER_DEFAULTS };
-  const rows = [...block.querySelectorAll(':scope > div')];
-  let keyed = false;
-  rows.forEach((row) => {
-    const cells = row.querySelectorAll(':scope > div');
-    if (cells.length >= 2) {
-      const key = cells[0].textContent.trim().toLowerCase();
-      if (key === 'title' || key === 'label' || key === 'show count') {
-        cfg[key] = cells[1].textContent.trim();
-        keyed = true;
-      }
-    }
-  });
-  if (!keyed) {
-    if (rows[0]) cfg['title'] = rows[0].textContent.trim() || cfg['title'];
-    if (rows[1]) cfg['label'] = rows[1].textContent.trim() || cfg['label'];
-  }
-  return cfg;
-}
-
-function decorateBanner(block) {
-  const cfg = readBannerConfig(block);
-  const showCount = String(cfg['show count']).toLowerCase() === 'true';
-  block.textContent = '';
-  const parts = cfg['title'].split(' ');
-  const last = parts.pop();
-  const head = parts.join(' ');
-  block.innerHTML = `
-    <div class="container">
-      <div class="browse-banner-inner">
-        <h1 class="browse-banner-title">${head} <em>${last}</em></h1>
-        ${showCount ? `
-        <div class="browse-banner-meta">
-          <span class="browse-banner-count" id="bannerCount">—</span>
-          <span class="browse-banner-label">${cfg['label']}</span>
-        </div>` : ''}
-      </div>
-    </div>`;
-}
-
 export default function decorate(block) {
-  // variant: | Hero (banner) |
-  if (block.classList.contains('banner')) { decorateBanner(block); return; }
-
   // Select <picture> only (NOT "picture, img" — that double-counts the inner img).
   let pics = [...block.querySelectorAll('picture')];
   if (!pics.length) pics = [...block.querySelectorAll('img')]; // fallback if no <picture>
@@ -104,10 +53,21 @@ export default function decorate(block) {
       modelImg.setAttribute('loading', 'eager');
       modelImg.setAttribute('fetchpriority', 'high');
       modelImg.setAttribute('decoding', 'async');
+      // CLS fix: explicit dimensions so the browser reserves space before
+      // hero.css (which loads lazily) pins the image to the 520px wrap.
+      if (!modelImg.getAttribute('width')) {
+        modelImg.setAttribute('width', '780');
+        modelImg.setAttribute('height', '1040');
+      }
     }
     grid.querySelector('.hero-model-wrap').prepend(model);
   }
   if (thumb) {
+    const thumbImg = thumb.tagName === 'IMG' ? thumb : thumb.querySelector('img');
+    if (thumbImg && !thumbImg.getAttribute('width')) {
+      thumbImg.setAttribute('width', '600');
+      thumbImg.setAttribute('height', '750');
+    }
     grid.querySelector('.hero-thumb').prepend(thumb);
   }
 }

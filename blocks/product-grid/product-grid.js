@@ -4,10 +4,9 @@
  * browse-clear-all, browse-active-filters, browse-main, browse-grid.
  */
 
-import { loadProducts, filterBySize, filterByPrice, searchProducts, sortProducts, getCollectionTypes, isSold } from '../../scripts/products.js';
+import { loadProducts, filterBySize, filterByPrice, searchProducts, sortProducts, getCollectionTypes, isSold, fmt } from '../../scripts/products.js';
 import { ensureAuth, getWishlist, saveWishlist } from '../../scripts/auth-guard.js';
 
-const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
 
 const state = {
   all: [], gender: 'all', categories: [], sizes: [], condition: 'all',
@@ -16,6 +15,35 @@ const state = {
 };
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Free Size'];
+
+/* ── BANNER (merged from the old `banner` block) ──
+   Renders the browse-page header (title + live item count). Previously a
+   separate `banner` block; now built here since banner only ever appeared
+   on /browse alongside this grid. Author these in the Product Grid config:
+     | Banner Title | All Finds |
+     | Banner Label | Curated pieces |
+     | Show Count   | true |
+   The last word of the title becomes the orange <em> accent. The count is
+   filled live below via #bannerCount. */
+function buildBannerHTML(cfg) {
+  const title = cfg['banner title'] || 'All Finds';
+  const label = cfg['banner label'] || 'Curated pieces';
+  const showCount = String(cfg['show count'] ?? 'true').toLowerCase() === 'true';
+  const parts = title.split(' ');
+  const last = parts.pop();
+  const head = parts.join(' ');
+  return `
+  <div class="container">
+    <div class="browse-banner-inner">
+      <h1 class="browse-banner-title">${head} <em>${last}</em></h1>
+      ${showCount ? `
+      <div class="browse-banner-meta">
+        <span class="browse-banner-count" id="bannerCount">—</span>
+        <span class="browse-banner-label">${label}</span>
+      </div>` : ''}
+    </div>
+  </div>`;
+}
 
 function buildFilterbarHTML() {
   return `
@@ -119,6 +147,9 @@ export default async function decorate(block) {
     'data source': '/data/products.json',
     'product path': '/product',
     'empty message': 'No items match your filters',
+    'banner title': 'All Finds',
+    'banner label': 'Curated pieces',
+    'show count': 'true',
   };
   const cfg = { ...DEFAULTS };
   block.querySelectorAll(':scope > div').forEach((row) => {
@@ -127,7 +158,7 @@ export default async function decorate(block) {
   });
   const emptyMsg = cfg['empty message'];
 
-  block.innerHTML = buildFilterbarHTML();
+  block.innerHTML = buildBannerHTML(cfg) + buildFilterbarHTML();
   const $ = (sel) => block.querySelector(sel);
   const $$ = (sel) => [...block.querySelectorAll(sel)];
   $('#browseEmptyMsg').textContent = emptyMsg;
